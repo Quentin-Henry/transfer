@@ -1,0 +1,3242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BASE 60 - Alternative Time Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400,700&family=IBM+Plex+Mono:wght@400,500,600&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #ffffff;
+      --bg-panel: #ffffff;
+      --text-primary: #000000;
+      --text-secondary: #000000;
+      --shadow-neumorphic: 8px 8px 16px rgba(0,0,0,0.08), -4px -4px 12px rgba(255,255,255,0.9);
+      --shadow-inset: inset 2px 2px 4px rgba(0,0,0,0.1), inset -2px -2px 4px rgba(255,255,255,0.8);
+      --border-radius: 30px;
+      --transition-speed: 300ms;
+      --fontsize: 1.3rem;
+    }
+
+   
+
+
+    body {
+      font-family: "VT323", monospace;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      letter-spacing: 0.05em;
+    }
+
+    .bitmap-text {
+      text-rendering: geometricPrecision;
+      -webkit-font-smoothing: none;
+      -moz-osx-font-smoothing: grayscale;
+      font-smooth: never;
+    }
+
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* ===== CONTROL PANEL ===== */
+    .control-panel {
+      width: 25vw;
+      background: var(--bg-panel);
+      padding: 32px 24px;
+      border: 1px solid rgba(0,0,0,0.1);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      border-radius: var(--border-radius);
+      transition: transform var(--transition-speed) ease;
+      position: fixed;
+      right: 32px;
+      top: 32px;
+      bottom: 32px;
+      z-index: 100;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .topPart{
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .control-panel.collapsed {
+      transform: translateX(calc(100% + 32px));
+    }
+
+    .panel-toggle {
+      position: absolute;
+      left: -48px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 80px;
+      background: var(--bg-panel);
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: var(--border-radius) 0 0 var(--border-radius);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--fontsize);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .panel-toggle:hover {
+      left: -52px;
+    }
+
+    .divider {
+      margin: 20px 0;
+      font-size: var(--fontsize);      
+      
+      letter-spacing: 0;
+      user-select: none;
+    }
+
+    .menu-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: var(--fontsize);
+      font-weight: 400;
+    }
+
+    .menu-back {
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 150ms;
+      user-select: none;
+    }
+
+    .menu-back:hover {
+      opacity: 1;
+    }
+
+    /* Menu page system */
+    .menu-page {
+      display: none;
+      animation: fadeIn 300ms ease;
+    }
+
+    .menu-page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Menu navigation items */
+    .menu-nav-item {
+      padding: 12px;
+      cursor: pointer;
+     
+      transition: all 150ms ease;
+      border-radius: 8px;
+      font-size: var(--fontsize);
+      font-weight: 400;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .menu-nav-item:hover {
+      opacity: 1;
+      background: rgba(0,0,0,0.03);
+    }
+
+    .nav-arrow {
+      font-size: 11px;
+    }
+
+    .system-title {
+      font-size: var(--fontsize);
+      font-weight: 400;
+      background: var(--text-primary);
+      color: var(--bg-panel);
+      padding: 6px 12px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .clock-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin: 16px 0;
+    }
+
+    .clock-menu-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      opacity: 0.3;
+      transition: all 150ms ease;
+      border-radius: 8px;
+      font-size: var(--fontsize);
+      font-weight: 400;
+    }
+
+    .clock-menu-item:hover {
+      opacity: 1;
+      background: rgba(0,0,0,0.03);
+    }
+
+    .clock-menu-item.active {
+      opacity: 1;
+      background: var(--text-primary);
+      color: var(--bg-panel);
+    }
+
+    .info-section {
+      margin: 20px 0;
+    }
+
+    .info-label {
+        font-size: var(--fontsize);
+      font-weight: 400;
+      margin-bottom: 12px;
+      background: var(--text-primary);
+      color: var(--bg-panel);
+      padding: 4px 8px;
+      display: inline-block;
+    }
+
+    .info-content {
+        font-size: var(--fontsize);
+      line-height: 1.6;
+      margin-bottom: 16px;
+      font-weight: 400;
+    }
+
+    .subdivisions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: var(--fontsize);
+      font-weight: 400;
+    }
+
+    .subdivision-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .subdivision-value {
+      font-weight: 400;
+    }
+
+    .subdivision-viz {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin: 20px 0;
+      justify-content: space-between;
+    }
+
+    .viz-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: var(--bg-panel);
+      
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: var(--fontsize);
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      transition: all 150ms ease;
+      opacity: 0.4;
+    }
+
+    .btn:hover {
+      opacity: 1;
+    }
+
+    .btn.active {
+      opacity: 1;
+      background: var(--text-primary);
+      color: var(--bg-panel);
+    }
+
+    .formula-section {
+        font-size: var(--fontsize);
+   
+      margin: 16px 0;
+     
+      font-weight: 400;
+    }
+
+    .description {
+        font-size: var(--fontsize);
+      font-weight: 400;
+    }
+
+    /* Contextual visualizations */
+    .contextual-viz {
+      min-height: 0;
+      transition: all 300ms ease;
+    }
+
+    .contextual-viz:empty {
+      display: none;
+    }
+
+    .contextual-viz canvas {
+      width: 100%;
+      height: auto;
+    }
+
+    .musical-staff {
+      margin: 16px 0;
+    }
+
+    .staff-lines {
+      position: relative;
+      height: 80px;
+      margin: 20px 0;
+    }
+
+    .staff-line {
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      background: var(--text-primary);
+      opacity: 0.4;
+    }
+
+    .note-marker {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: var(--text-primary);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .chord-name {
+      text-align: center;
+      font-size: var(--fontsize);
+      margin-top: 8px;
+      opacity: 0.8;
+    }
+
+    .uncertainty-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .uncertainty-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: var(--fontsize);
+    }
+
+    .uncertainty-label {
+      width: 60px;
+      opacity: 0.6;
+    }
+
+    .uncertainty-bar {
+      flex: 1;
+      height: 12px;
+      background: rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .uncertainty-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      background: var(--text-primary);
+      opacity: 0.6;
+      transition: width 300ms ease;
+    }
+
+    .uncertainty-value {
+      font-size: 14px;
+      opacity: 0.6;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    .hand-diagram {
+      margin: 16px 0;
+      text-align: center;
+    }
+
+    .hand-diagram canvas {
+      max-width: 280px;
+      margin: 0 auto;
+      display: block;
+    }
+
+    .hand-labels {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 8px;
+      font-size: 14px;
+      opacity: 0.6;
+    }
+
+    .lunar-phases {
+      display: flex;
+      justify-content: space-around;
+      margin: 16px 0;
+      padding: 8px 0;
+    }
+
+    .phase-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--text-primary);
+      position: relative;
+      opacity: 0.3;
+      transition: opacity 150ms;
+    }
+
+    .phase-circle.active {
+      opacity: 1;
+      background: var(--text-primary);
+    }
+
+    .phase-circle.new-moon {
+      background: transparent;
+    }
+
+    .phase-circle.full-moon {
+      background: var(--text-primary);
+    }
+
+    .phase-circle.first-quarter::after,
+    .phase-circle.last-quarter::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      background: var(--text-primary);
+    }
+
+    .phase-circle.first-quarter::after {
+      right: 0;
+      border-radius: 0 100% 100% 0;
+    }
+
+    .phase-circle.last-quarter::after {
+      left: 0;
+      border-radius: 100% 0 0 100%;
+    }
+
+    .binary-dots {
+      display: flex;
+      justify-content: space-around;
+      margin: 16px 0;
+      gap: 12px;
+    }
+
+    .binary-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .binary-label {
+      font-size: 12px;
+      opacity: 0.6;
+    }
+
+    .binary-value {
+      display: flex;
+      gap: 4px;
+    }
+
+    .binary-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid var(--text-primary);
+      transition: background 150ms;
+    }
+
+    .binary-dot.on {
+      background: var(--text-primary);
+    }
+
+    .hex-display {
+      display: flex;
+      justify-content: space-around;
+      margin: 16px 0;
+      gap: 8px;
+    }
+
+    .hex-digit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hex-digit-label {
+      font-size: 12px;
+      opacity: 0.6;
+    }
+
+    .seven-segment {
+      width: 40px;
+      height: 60px;
+      position: relative;
+      margin: 8px;
+    }
+
+    .segment {
+      position: absolute;
+      background: rgba(10,10,10,0.1);
+      transition: background 150ms;
+    }
+
+    .segment.on {
+      background: var(--text-primary);
+    }
+
+    .segment.horizontal {
+      width: 30px;
+      height: 4px;
+      left: 5px;
+    }
+
+    .segment.vertical {
+      width: 4px;
+      height: 22px;
+    }
+
+    .mayan-notation {
+      display: flex;
+      justify-content: space-around;
+      margin: 16px 0;
+      gap: 16px;
+    }
+
+    .mayan-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mayan-label {
+      font-size: 12px;
+      opacity: 0.6;
+    }
+
+    .mayan-number {
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 4px;
+      min-height: 60px;
+      justify-content: flex-end;
+    }
+
+    .mayan-bar {
+      width: 30px;
+      height: 4px;
+      background: var(--text-primary);
+      margin: 2px 0;
+    }
+
+    .mayan-dots {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 40px;
+    }
+
+    .mayan-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-primary);
+    }
+
+    .mayan-zero {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--text-primary);
+      position: relative;
+    }
+
+    .mayan-zero::before,
+    .mayan-zero::after {
+      content: '';
+      position: absolute;
+      background: var(--text-primary);
+    }
+
+    .mayan-zero::before {
+      width: 12px;
+      height: 2px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    .mayan-zero::after {
+      width: 12px;
+      height: 2px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+
+    /* Menu categories */
+    .menu-category {
+      margin: 16px 0;
+    }
+
+    .category-title {
+        font-size: var(--fontsize);
+      font-weight: 400;
+     
+      margin-bottom: 8px;
+    
+    }
+
+    .system-nav-arrow:hover {
+      opacity: 1 !important;
+    }
+
+    /* Audio controls */
+    .audio-controls {
+      margin: 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .audio-toggle {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--text-primary);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: var(--fontsize);
+      transition: all 150ms ease;
+      opacity: 0.4;
+    }
+
+    .audio-toggle:hover {
+      opacity: 1;
+    }
+
+    .audio-toggle.active {
+      opacity: 1;
+      background: var(--text-primary);
+      color: var(--bg-panel);
+    }
+
+    /* ===== CLOCK AREA ===== */
+    .clock-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: margin-right var(--transition-speed) ease;
+      margin-right: 444px;
+      padding: 40px;
+      height: 100vh;
+    }
+
+    .clock-container.expanded {
+      margin-right: 40px;
+    }
+
+    .clock-header {
+      position: fixed;
+      top: 32px;
+      left: 32px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 20px;
+      z-index: 50;
+      background: var(--bg-panel);
+      border: 1px solid rgba(0,0,0,0.1);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      border-radius: 30px;
+      padding: 16px 20px;
+    }
+
+    .app-title {
+        font-size: var(--fontsize);
+      font-weight: 400;
+    }
+
+    .time-display {
+        font-size: var(--fontsize);
+      font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+
+    .clock-viz {
+      position: relative;
+      width: min(calc(100vw - 550px), calc(100vh - 180px));
+      height: min(calc(100vw - 550px), calc(100vh - 180px));
+      max-width: 900px;
+      max-height: 900px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0;
+    }
+    
+    .clock-container.expanded .clock-viz {
+      width: min(calc(100vw - 120px), calc(100vh - 180px));
+      height: min(calc(100vw - 120px), calc(100vh - 180px));
+    }
+
+    #clockCanvas {
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+
+    @media (max-width: 768px) {
+      .control-panel {
+        width: calc(100% - 64px);
+        height: auto;
+        max-height: 60vh;
+        top: auto;
+        bottom: 32px;
+        left: 32px;
+        right: 32px;
+        border-radius: var(--border-radius);
+        transform: translateY(0);
+      }
+
+      .control-panel.collapsed {
+        transform: translateY(calc(100% + 32px));
+      }
+
+      .panel-toggle {
+        left: 50%;
+        transform: translateX(-50%);
+        top: -48px;
+        width: 80px;
+        height: 40px;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+      }
+
+      .clock-container {
+        margin-right: 0;
+        padding: 20px;
+      }
+
+      .clock-container.expanded {
+        margin-right: 0;
+      }
+
+      .clock-header {
+        top: 20px;
+        left: 20px;
+      }
+
+      .clock-viz {
+        width: min(calc(100vw - 40px), calc(100vh - 420px));
+        height: min(calc(100vw - 40px), calc(100vh - 420px));
+        max-width: 600px;
+        max-height: 600px;
+      }
+
+      .subdivision-viz {
+        gap: 12px;
+      }
+
+      .viz-circle {
+        width: 48px;
+        height: 48px;
+      }
+    }
+  </style>
+</head>
+<body class="bitmap-text">
+  
+  <!-- Control Panel -->
+  <aside class="control-panel" id="controlPanel">
+    <div class="panel-toggle" id="panelToggle">◀</div>
+    
+    <!-- Main Menu Page -->
+    <div class="menu-page active" id="mainMenu">
+   
+      <div class="topPart">
+      <div class="menu-header" style="cursor: pointer;" id="menuHeaderNav">
+        <span>← SELECTION MENU</span>
+      </div>
+      
+      <div class="system-title-container" style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+        <span class="system-nav-arrow" id="prevSystem" style="cursor: pointer; opacity: 0.6; font-size: 11px; user-select: none;">◀</span>
+        <div class="system-title" id="systemTitle" style="cursor: default;">Base 60★</div>
+        <span class="system-nav-arrow" id="nextSystem" style="cursor: pointer; opacity: 0.6; font-size: 11px; user-select: none;">▶</span>
+      </div>
+    </div>
+      
+      <div class="divider">- - - - - - - - - - - - - - - - - - - - - - -</div>
+      
+      <div class="info-label" id="systemCategory">STANDARD TIME</div>
+      <div class="info-content" id="systemName">
+        SEXAGESIMAL-TETRAVIGESIMAL HYBRID SYSTEM
+      </div>
+      
+      <div class="subdivisions">
+        <div class="subdivision-row">
+          <span>HOURS</span>
+          <span class="subdivision-value" id="hoursValue">24</span>
+        </div>
+        <div class="subdivision-row">
+          <span>MINUTES</span>
+          <span class="subdivision-value" id="minutesValue">60</span>
+        </div>
+        <div class="subdivision-row">
+          <span>SECONDS</span>
+          <span class="subdivision-value" id="secondsValue">60</span>
+        </div>
+      </div>
+      
+      <div class="divider">- - - - - - - - - - - - - - - - - - - - - - -</div>
+      
+      <div class="subdivision-viz">
+        <div class="viz-circle">
+          <canvas id="hourViz" width="100" height="100"></canvas>
+        </div>
+        <div class="viz-circle">
+          <canvas id="minuteViz" width="100" height="100"></canvas>
+        </div>
+        <div class="viz-circle">
+          <canvas id="secondViz" width="100" height="100"></canvas>
+        </div>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn" id="btnHours">24H</button>
+        <button class="btn" id="btnMinutes">60M</button>
+        <button class="btn" id="btnSeconds">60S</button>
+      </div>
+      
+      <div class="divider">- - - - - - - - - - - - - - - - - - - - - - -</div>
+      
+      <!-- Audio controls (only show for harmonic system) -->
+      <div class="audio-controls" id="audioControls" style="display: none;">
+        <button class="audio-toggle" id="audioToggle">♪ SOUND OFF</button>
+      </div>
+      
+      <!-- Contextual visualization area -->
+      <div class="contextual-viz" id="contextualViz" style="margin: 16px 0;">
+        <!-- Content will be dynamically inserted based on system -->
+      </div>
+      
+      <div class="divider" id="contextualDivider">- - - - - - - - - - - - - - - - - - - - - - -</div>
+      
+      <div class="description" id="description">
+        STANDARD TIME CONTAINS TWO ANCIENT LEGACIES. EGYPTIAN ASTRONOMERS WHO DIVIDED DAY AND NIGHT INTO 12 PARTS EACH, AND BABYLONIAN MERCHANTS WHO COUNTED IN INTERVALS OF 60. THIS HYBRID SYSTEM IS TESTAMENT TO HOW DEEPLY HISTORICAL PRACTICES SHAPE OUR PERCEPTION OF TIME'S NATURAL ORDER.
+      </div>
+    </div>
+    
+    <!-- Clock Selection Menu Page -->
+    <div class="menu-page" id="clockMenu">
+      <div class="divider">- - - - - - - - - - - - - - - - - - - - - - -</div>
+      
+      <div class="menu-header">
+        <span class="menu-back" data-back="mainMenu">← BACK</span>
+        <span>TIME SYSTEMS</span>
+      </div>
+      
+      <div class="divider">- - - - - - - - - - - - - - - - - - - - - - -</div>
+      
+      <div class="menu-category">
+        <div class="category-title">HISTORICAL SYSTEMS</div>
+        <div class="clock-menu">
+          <div class="clock-menu-item active" data-system="regular">Base 60 (Standard)</div>
+          <div class="clock-menu-item" data-system="decimal">Base 10 (Decimal)</div>
+          <div class="clock-menu-item" data-system="duodecimal">Base 12 (Dozenal)</div>
+          <div class="clock-menu-item" data-system="vigesimal">Base 20 (Vigesimal)</div>
+        </div>
+      </div>
+      
+      <div class="menu-category">
+        <div class="category-title">MATHEMATICAL SYSTEMS</div>
+        <div class="clock-menu">
+          <div class="clock-menu-item" data-system="quinary">Base 5 (Quinary)</div>
+          <div class="clock-menu-item" data-system="septimal">Base 7 (Septimal)</div>
+          <div class="clock-menu-item" data-system="octal">Base 8 (Octal)</div>
+          <div class="clock-menu-item" data-system="hexadecimal">Base 16 (Hexadecimal)</div>
+          <div class="clock-menu-item" data-system="binary">Base 2 (Binary)</div>
+          <div class="clock-menu-item" data-system="prime">Base p′ (Prime)</div>
+        </div>
+      </div>
+      
+      <div class="menu-category">
+        <div class="category-title">NATURAL SYSTEMS</div>
+        <div class="clock-menu">
+          <div class="clock-menu-item" data-system="fibonacci">Base φ (Fibonacci)</div>
+          <div class="clock-menu-item" data-system="golden">Base φ (Golden)</div>
+          <div class="clock-menu-item" data-system="pi">Base π (Pi)</div>
+          <div class="clock-menu-item" data-system="lunar">Base ☾ (Lunar)</div>
+        </div>
+      </div>
+      
+      <div class="menu-category">
+        <div class="category-title">ANATOMICAL SYSTEMS</div>
+        <div class="clock-menu">
+          <div class="clock-menu-item" data-system="finger">Finger Counting</div>
+        </div>
+      </div>
+      
+      <div class="menu-category">
+        <div class="category-title">EXPERIMENTAL SYSTEMS</div>
+        <div class="clock-menu">
+          <div class="clock-menu-item" data-system="harmonic">Base 12 (Harmonic ♪)</div>
+          <div class="clock-menu-item" data-system="quantum">Base Ψ (Quantum)</div>
+        </div>
+      </div>
+      
+      <div class="divider">- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</div>
+      
+      <div class="menu-nav-item" data-back="mainMenu">
+        <span>← BACK TO MAIN</span>
+      </div>
+    </div>
+    
+  </aside>
+  
+  <!-- Clock Container -->
+  <main class="clock-container" id="clockContainer">
+    
+    <!-- Header with title and time -->
+    <div class="clock-header">
+      <div class="app-title">base60★</div>
+      <div class="time-display" id="timeDisplay">00:00:00</div>
+    </div>
+    
+    <!-- Clock Visualization -->
+    <div class="clock-viz">
+      <canvas id="clockCanvas"></canvas>
+    </div>
+    
+  </main>
+
+  <script>
+    // ===== AUDIO SYSTEM =====
+    
+    class HarmonicAudioSystem {
+      constructor() {
+        this.audioContext = null;
+        this.oscillators = { hours: null, minutes: null, seconds: null };
+        this.gainNodes = { hours: null, minutes: null, seconds: null };
+        this.masterGain = null;
+        this.isPlaying = false;
+      }
+
+      init() {
+        if (!this.audioContext) {
+          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          this.masterGain = this.audioContext.createGain();
+          this.masterGain.connect(this.audioContext.destination);
+          this.masterGain.gain.value = 0.15; // Overall volume
+        }
+      }
+
+      start() {
+        this.init();
+        
+        // Create oscillators and gain nodes for each hand
+        ['hours', 'minutes', 'seconds'].forEach((hand, index) => {
+          const osc = this.audioContext.createOscillator();
+          const gain = this.audioContext.createGain();
+          
+          osc.type = 'sine';
+          osc.frequency.value = 440; // A4, will be updated
+          
+          // Different volumes for each hand
+          const volumes = { hours: 0.6, minutes: 0.4, seconds: 0.3 };
+          gain.gain.value = volumes[hand];
+          
+          osc.connect(gain);
+          gain.connect(this.masterGain);
+          osc.start();
+          
+          this.oscillators[hand] = osc;
+          this.gainNodes[hand] = gain;
+        });
+        
+        this.isPlaying = true;
+      }
+
+      stop() {
+        if (this.isPlaying) {
+          ['hours', 'minutes', 'seconds'].forEach(hand => {
+            if (this.oscillators[hand]) {
+              this.oscillators[hand].stop();
+              this.oscillators[hand] = null;
+            }
+          });
+          this.isPlaying = false;
+        }
+      }
+
+      updateFrequencies(noteIndices) {
+        if (!this.isPlaying) return;
+        
+        // C major scale frequencies (starting from C4)
+        const frequencies = [
+          261.63, // C
+          277.18, // C#
+          293.66, // D
+          311.13, // D#
+          329.63, // E
+          349.23, // F
+          369.99, // F#
+          392.00, // G
+          415.30, // G#
+          440.00, // A
+          466.16, // A#
+          493.88  // B
+        ];
+        
+        const hands = ['hours', 'minutes', 'seconds'];
+        hands.forEach((hand, index) => {
+          if (this.oscillators[hand] && noteIndices[index] !== undefined) {
+            const freq = frequencies[noteIndices[index] % 12];
+            this.oscillators[hand].frequency.setTargetAtTime(
+              freq,
+              this.audioContext.currentTime,
+              0.1
+            );
+          }
+        });
+      }
+    }
+
+    const audioSystem = new HarmonicAudioSystem();
+
+    // ===== CANVAS CLOCK RENDERER =====
+    
+    class CanvasClockRenderer {
+      constructor(canvasId, size = 600) {
+        this.canvas = document.getElementById(canvasId);
+        this.fullSize = size;
+        this.pixelationScale = 0.22;
+        
+        this.hiResCanvas = document.createElement('canvas');
+        this.hiResCanvas.width = this.fullSize;
+        this.hiResCanvas.height = this.fullSize;
+        this.hiResCtx = this.hiResCanvas.getContext('2d');
+        
+        this.loResCanvas = document.createElement('canvas');
+        this.loResCtx = this.loResCanvas.getContext('2d');
+        
+        this.ctx = this.canvas.getContext('2d');
+        
+        this.setupCanvas();
+        
+        this.framePolygonSides = 24;
+        this.polygonSides = 24;
+        this.showPolygon = false;
+        this.secondDeg = 0;
+        this.minuteDeg = 0;
+        this.hourDeg = 0;
+      }
+
+      setupCanvas() {
+        const rect = this.canvas.parentElement.getBoundingClientRect();
+        const displaySize = Math.min(rect.width, rect.height);
+        
+        this.fullSize = Math.max(600, Math.min(displaySize * 1.5, 1200));
+        
+        this.hiResCanvas.width = this.fullSize;
+        this.hiResCanvas.height = this.fullSize;
+        
+        this.canvas.width = displaySize;
+        this.canvas.height = displaySize;
+        this.canvas.style.width = displaySize + 'px';
+        this.canvas.style.height = displaySize + 'px';
+        
+        this.ctx.imageSmoothingEnabled = false;
+        this.updatePixelationCanvases();
+      }
+
+      updatePixelationCanvases() {
+        const lowResSize = Math.max(1, Math.floor(this.fullSize * this.pixelationScale));
+        this.loResCanvas.width = lowResSize;
+        this.loResCanvas.height = lowResSize;
+        this.loResCtx.imageSmoothingEnabled = false;
+      }
+
+      drawPolygon(sides) {
+        const ctx = this.hiResCtx;
+        const centerX = this.fullSize / 2;
+        const centerY = this.fullSize / 2;
+        const radius = this.fullSize * 0.42;
+        const angleStep = (2 * Math.PI) / sides;
+
+        ctx.beginPath();
+        for (let i = 0; i <= sides; i++) {
+          const angle = i * angleStep - Math.PI / 2;
+          const x = centerX + radius * Math.cos(angle);
+          const y = centerY + radius * Math.sin(angle);
+          
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        ctx.strokeStyle = '#0a0a0a';
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.4;
+        ctx.stroke();
+
+        ctx.globalAlpha = 0.3;
+        ctx.lineWidth = 1.5;
+        for (let i = 0; i < sides; i++) {
+          const angle = i * angleStep - Math.PI / 2;
+          const x = centerX + radius * Math.cos(angle);
+          const y = centerY + radius * Math.sin(angle);
+          
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+        }
+        
+        ctx.globalAlpha = 1;
+      }
+
+      drawHand(length, width, angle, color = '#0a0a0a') {
+        const ctx = this.hiResCtx;
+        const centerX = this.fullSize / 2;
+        const centerY = this.fullSize / 2;
+        
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate((angle - 90) * Math.PI / 180);
+        
+        ctx.fillStyle = color;
+        ctx.fillRect(0, -width / 2, length, width);
+        
+        ctx.restore();
+      }
+
+      drawCenter() {
+        const ctx = this.hiResCtx;
+        const centerX = this.fullSize / 2;
+        const centerY = this.fullSize / 2;
+        const radius = 10;
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fill();
+      }
+
+      render() {
+        this.hiResCtx.clearRect(0, 0, this.fullSize, this.fullSize);
+        
+        this.drawClockFrame();
+        
+        if (this.showPolygon) {
+          this.drawPolygon(this.polygonSides);
+        }
+        
+        this.drawHand(this.fullSize * 0.22, 18, this.hourDeg);
+        this.drawHand(this.fullSize * 0.32, 9, this.minuteDeg);
+        this.drawHand(this.fullSize * 0.38, 4, this.secondDeg);
+        
+        this.drawCenter();
+        
+        this.applyPixelation();
+      }
+
+      drawClockFrame() {
+        const ctx = this.hiResCtx;
+        const centerX = this.fullSize / 2;
+        const centerY = this.fullSize / 2;
+        const radius = this.fullSize * 0.42;
+        
+        const sides = this.framePolygonSides;
+        const angleStep = (2 * Math.PI) / sides;
+
+        ctx.beginPath();
+        for (let i = 0; i <= sides; i++) {
+          const angle = i * angleStep - Math.PI / 2;
+          const x = centerX + radius * Math.cos(angle);
+          const y = centerY + radius * Math.sin(angle);
+          
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        
+        ctx.strokeStyle = '#0a0a0a';
+        ctx.lineWidth = 3;
+        ctx.globalAlpha = 0.6;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      applyPixelation() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.loResCtx.clearRect(0, 0, this.loResCanvas.width, this.loResCanvas.height);
+        this.loResCtx.drawImage(
+          this.hiResCanvas, 
+          0, 0, 
+          this.loResCanvas.width, 
+          this.loResCanvas.height
+        );
+        
+        this.ctx.imageSmoothingEnabled = false;
+        this.ctx.drawImage(
+          this.loResCanvas,
+          0, 0,
+          this.canvas.width,
+          this.canvas.height
+        );
+      }
+
+      updateTime(secondDeg, minuteDeg, hourDeg) {
+        this.secondDeg = secondDeg;
+        this.minuteDeg = minuteDeg;
+        this.hourDeg = hourDeg;
+        this.render();
+      }
+
+      updatePolygon(sides) {
+        this.polygonSides = sides;
+        this.showPolygon = true;
+        this.render();
+      }
+
+      hidePolygon() {
+        this.showPolygon = false;
+        this.render();
+      }
+    }
+
+    // ===== TIME SYSTEM CLASSES =====
+    
+    class TimeSystem {
+      constructor(name, baseInfo, intervalMs) {
+        this.name = name;
+        this.baseInfo = baseInfo;
+        this.intervalMs = intervalMs;
+      }
+
+      calculateTime(date) {
+        throw new Error("calculateTime must be implemented");
+      }
+
+      formatDisplay(hours, minutes, seconds) {
+        return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
+      }
+
+      pad(number, base = 10) {
+        return number.toString(base).padStart(2, "0").toUpperCase();
+      }
+
+      getExtraInfo() {
+        return this.baseInfo;
+      }
+
+      getDayProgress(date) {
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const seconds = date.getSeconds();
+        const milliseconds = date.getMilliseconds();
+        return (hours * 3600 + minutes * 60 + seconds + milliseconds / 1000) / 86400;
+      }
+    }
+
+    class RegularTimeSystem extends TimeSystem {
+      constructor() {
+        super("regular", "Regular Time (Base 60)", 1000);
+      }
+
+      calculateTime(date) {
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const seconds = date.getSeconds();
+
+        return {
+          secondDeg: (seconds / 60) * 360,
+          minuteDeg: ((minutes + seconds / 60) / 60) * 360,
+          hourDeg: (((hours % 12) + minutes / 60) / 12) * 360,
+          displayText: this.formatDisplay(hours, minutes, seconds),
+          extraInfo: this.getExtraInfo(),
+          description: "STANDARD TIME CONTAINS TWO ANCIENT LEGACIES. EGYPTIAN ASTRONOMERS WHO DIVIDED DAY AND NIGHT INTO 12 PARTS EACH, AND BABYLONIAN MERCHANTS WHO COUNTED IN INTERVALS OF 60. THIS HYBRID SYSTEM IS TESTAMENT TO HOW DEEPLY HISTORICAL PRACTICES SHAPE OUR PERCEPTION OF TIME'S NATURAL ORDER.",
+          systemName: "SEXAGESIMAL-TETRAVIGESIMAL HYBRID SYSTEM",
+          systemTitle: "Base 60★",
+          systemCategory: "STANDARD TIME"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 24, minutes: 60, seconds: 60 };
+      }
+    }
+
+    class DecimalTimeSystem extends TimeSystem {
+      constructor() {
+        super("decimal", "Decimal Time (Base 10)", 864);
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const totalDecimalSeconds = Math.floor(dayProgress * 100000);
+
+        const decimalHours = Math.floor(totalDecimalSeconds / 10000);
+        const decimalMinutes = Math.floor((totalDecimalSeconds % 10000) / 100);
+        const decimalSeconds = Math.floor(totalDecimalSeconds % 100);
+
+        return {
+          secondDeg: (decimalSeconds / 100) * 360,
+          minuteDeg: ((decimalMinutes + decimalSeconds / 100) / 100) * 360,
+          hourDeg: ((decimalHours + decimalMinutes / 100) / 10) * 360,
+          displayText: this.formatDisplay(decimalHours, decimalMinutes, decimalSeconds),
+          extraInfo: this.getExtraInfo(),
+          description: "DECIMAL TIME DIVIDES THE DAY INTO 10 HOURS OF 100 MINUTES, EACH CONTAINING 100 SECONDS. BRIEFLY ADOPTED DURING THE FRENCH REVOLUTION AS PART OF THE METRIC SYSTEM, IT REPRESENTS AN ATTEMPT TO RATIONALIZE TIME THROUGH BASE-10 MATHEMATICS.",
+          systemName: "REVOLUTIONARY DECIMAL SYSTEM",
+          systemTitle: "Base 10",
+          systemCategory: "HISTORICAL SYSTEM"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 10, minutes: 100, seconds: 100 };
+      }
+    }
+
+    class HexadecimalTimeSystem extends TimeSystem {
+      constructor() {
+        super("hexadecimal", "Hexadecimal Time (Base 16)", 136);
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const totalHexSeconds = Math.floor(dayProgress * (16 * 256 * 256));
+        const hexHours = Math.floor(totalHexSeconds / (256 * 256));
+        const hexMinutes = Math.floor((totalHexSeconds % (256 * 256)) / 256);
+        const hexSeconds = Math.floor(totalHexSeconds % 256);
+
+        return {
+          secondDeg: (hexSeconds / 256) * 360,
+          minuteDeg: ((hexMinutes + hexSeconds / 256) / 256) * 360,
+          hourDeg: ((hexHours + hexMinutes / 256) / 16) * 360,
+          displayText: this.formatDisplay(hexHours, hexMinutes, hexSeconds, 16),
+          extraInfo: `${this.baseInfo}`,
+          description: "HEXADECIMAL TIME USES BASE-16 NUMBERING WITH SYMBOLS 0-9 AND A-F. THE SYSTEM REFLECTS COMPUTER ARCHITECTURE WHERE INFORMATION IS PROCESSED IN POWERS OF TWO. THIS CREATES A COMPUTATIONAL TIME FRAMEWORK ALIGNED WITH DIGITAL SYSTEMS.",
+          systemName: "HEXADECIMAL DIGITAL SYSTEM",
+          systemTitle: "Base 16",
+          systemCategory: "MATHEMATICAL SYSTEM"
+        };
+      }
+
+      formatDisplay(hours, minutes, seconds, base = 16) {
+        return `${this.pad(hours, base)}:${this.pad(minutes, base)}:${this.pad(seconds, base)}`;
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 16, minutes: 256, seconds: 256 };
+      }
+    }
+
+    class BinaryTimeSystem extends TimeSystem {
+      constructor() {
+        super("binary", "Binary Time", 336);
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const totalBinarySeconds = Math.floor(dayProgress * (8 * 8 * 8));
+
+        const binaryHours = Math.floor(totalBinarySeconds / (8 * 8));
+        const binaryMinutes = Math.floor((totalBinarySeconds % (8 * 8)) / 8);
+        const binarySeconds = Math.floor(totalBinarySeconds % 8);
+
+        return {
+          secondDeg: (binarySeconds / 8) * 360,
+          minuteDeg: ((binaryMinutes + binarySeconds / 8) / 8) * 360,
+          hourDeg: ((binaryHours + binaryMinutes / 8) / 8) * 360,
+          displayText: `${binaryHours}:${binaryMinutes}:${binarySeconds}`,
+          extraInfo: `Binary Structure (8:8:8)`,
+          description: "BINARY TIME REPRESENTS TIME IN BASE-2 STRUCTURE, THE FUNDAMENTAL LANGUAGE OF COMPUTATION. WITH 8 HOURS, MINUTES, AND SECONDS (2³), IT STRIPS TIME TO ITS MOST ELEMENTAL FORM, REVEALING THE DIGITAL SUBSTRATE BENEATH ALL CONTEMPORARY TIMEKEEPING.",
+          systemName: "PURE BINARY STRUCTURE",
+          systemTitle: "Base 2",
+          systemCategory: "MATHEMATICAL SYSTEM"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 8, minutes: 8, seconds: 8 };
+      }
+    }
+
+    class OctalTimeSystem extends TimeSystem {
+      constructor() {
+        super("octal", "Octal Time (Base 8)", 336);
+        this.maxHours = 8;
+        this.maxMinutes = 64;
+        this.maxSeconds = 64;
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const totalOctalSeconds = Math.floor(
+          dayProgress * (this.maxHours * this.maxMinutes * this.maxSeconds)
+        );
+
+        const octalHours = Math.floor(totalOctalSeconds / (this.maxMinutes * this.maxSeconds));
+        const octalMinutes = Math.floor((totalOctalSeconds % (this.maxMinutes * this.maxSeconds)) / this.maxSeconds);
+        const octalSeconds = Math.floor(totalOctalSeconds % this.maxSeconds);
+
+        return {
+          secondDeg: (octalSeconds / this.maxSeconds) * 360,
+          minuteDeg: ((octalMinutes + octalSeconds / this.maxSeconds) / this.maxMinutes) * 360,
+          hourDeg: ((octalHours + octalMinutes / this.maxMinutes) / this.maxHours) * 360,
+          displayText: `${octalHours}:${octalMinutes}:${octalSeconds}`,
+          extraInfo: `Octal Structure (8:64:64)`,
+          description: "OCTAL TIME USES BASE-8 STRUCTURE, HISTORICALLY IMPORTANT IN EARLY COMPUTING SYSTEMS. WITH 8 HOURS PER DAY AND 64 SUBDIVISIONS (8²), IT CREATES A POWER-OF-TWO HIERARCHY THAT BRIDGES HUMAN INTUITION AND MACHINE LOGIC.",
+          systemName: "OCTAL COMPUTATIONAL SYSTEM",
+          systemTitle: "Base 8",
+          systemCategory: "MATHEMATICAL SYSTEM"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 8, minutes: 64, seconds: 64 };
+      }
+    }
+
+    class QuinaryTimeSystem extends TimeSystem {
+      constructor() {
+        super("quinary", "Quinary Time (Base 5)", 1380);
+        this.maxHours = 5;
+        this.maxMinutes = 25;
+        this.maxSeconds = 25;
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const totalQuinarySeconds = Math.floor(dayProgress * (this.maxHours * this.maxMinutes * this.maxSeconds));
+
+        const quinaryHours = Math.floor(totalQuinarySeconds / (this.maxMinutes * this.maxSeconds));
+        const quinaryMinutes = Math.floor((totalQuinarySeconds % (this.maxMinutes * this.maxSeconds)) / this.maxSeconds);
+        const quinarySeconds = Math.floor(totalQuinarySeconds % this.maxSeconds);
+
+        return {
+          secondDeg: (quinarySeconds / this.maxSeconds) * 360,
+          minuteDeg: ((quinaryMinutes + quinarySeconds / this.maxSeconds) / this.maxMinutes) * 360,
+          hourDeg: ((quinaryHours + quinaryMinutes / this.maxMinutes) / this.maxHours) * 360,
+          displayText: `${quinaryHours}:${quinaryMinutes}:${quinarySeconds}`,
+          extraInfo: `Quinary (5:25:25)`,
+          description: "QUINARY TIME USES BASE-5, A SYSTEM FOUND IN SEVERAL TRADITIONAL COUNTING METHODS. WITH 5 HOURS (ONE HAND) AND 25-UNIT SUBDIVISIONS (5²), IT OFFERS A COMPACT MATHEMATICAL ALTERNATIVE ROOTED IN THE SIMPLICITY OF FINGER COUNTING.",
+          systemName: "QUINARY MATHEMATICAL SYSTEM",
+          systemTitle: "Base 5",
+          systemCategory: "MATHEMATICAL SYSTEM"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 5, minutes: 25, seconds: 25 };
+      }
+    }
+
+    class SeptimalTimeSystem extends TimeSystem {
+      constructor() {
+        super("septimal", "Septimal Time (Base 7)", 252);
+        this.maxHours = 7;
+        this.maxMinutes = 49;
+        this.maxSeconds = 49;
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const totalSeptimalSeconds = Math.floor(dayProgress * (this.maxHours * this.maxMinutes * this.maxSeconds));
+
+        const septalHours = Math.floor(totalSeptimalSeconds / (this.maxMinutes * this.maxSeconds));
+        const septalMinutes = Math.floor((totalSeptimalSeconds % (this.maxMinutes * this.maxSeconds)) / this.maxSeconds);
+        const septalSeconds = Math.floor(totalSeptimalSeconds % this.maxSeconds);
+
+        return {
+          secondDeg: (septalSeconds / this.maxSeconds) * 360,
+          minuteDeg: ((septalMinutes + septalSeconds / this.maxSeconds) / this.maxMinutes) * 360,
+          hourDeg: ((septalHours + septalMinutes / this.maxMinutes) / this.maxHours) * 360,
+          displayText: `${septalHours}:${septalMinutes}:${septalSeconds}`,
+          extraInfo: `Septimal (7:49:49)`,
+          description: "SEPTIMAL TIME FOLLOWS BASE-7 MATHEMATICS. WITH 7 HOURS AND 49-UNIT SUBDIVISIONS (7²), IT CREATES A PURE SEPTIMAL RHYTHM THAT ECHOES THE SEVEN-DAY WEEK GOVERNING MUCH OF HUMAN CIVILIZATION.",
+          systemName: "SEPTIMAL MATHEMATICAL SYSTEM",
+          systemTitle: "Base 7",
+          systemCategory: "MATHEMATICAL SYSTEM"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 7, minutes: 49, seconds: 49 };
+      }
+    }
+
+    class DuodecimalTimeSystem extends TimeSystem {
+      constructor() {
+        super("duodecimal", "Duodecimal Time (Base 12)", 200);
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const totalDuoSeconds = Math.floor(dayProgress * (12 * 144 * 144));
+
+        const duoHours = Math.floor(totalDuoSeconds / (144 * 144));
+        const duoMinutes = Math.floor((totalDuoSeconds % (144 * 144)) / 144);
+        const duoSeconds = Math.floor(totalDuoSeconds % 144);
+
+        const toBase12 = (num) => {
+          if (num < 10) return num.toString();
+          return "AB"[num - 10];
+        };
+
+        const formatDuo = (num) => {
+          const first = Math.floor(num / 12);
+          const second = num % 12;
+          return `${toBase12(first)}${toBase12(second)}`;
+        };
+
+        return {
+          secondDeg: (duoSeconds / 144) * 360,
+          minuteDeg: ((duoMinutes + duoSeconds / 144) / 144) * 360,
+          hourDeg: ((duoHours + duoMinutes / 144) / 12) * 360,
+          displayText: `${toBase12(duoHours)}:${formatDuo(duoMinutes)}:${formatDuo(duoSeconds)}`,
+          extraInfo: `Base 12 (A=10, B=11) - Dec: ${duoHours}:${duoMinutes}:${duoSeconds}`,
+          description: "DOZENAL TIME USES BASE-12, A SYSTEM WITH SUPERIOR DIVISIBILITY. TWELVE DIVIDES EVENLY BY 2, 3, 4, AND 6, MAKING IT MORE FLEXIBLE THAN BASE-10. HISTORICALLY SEEN IN INCHES, MONTHS, AND HOURS, IT REPRESENTS A PRACTICAL ALTERNATIVE TO DECIMAL THINKING.",
+          systemName: "DOZENAL DIVISIBILITY SYSTEM",
+          systemTitle: "Base 12",
+          systemCategory: "HISTORICAL SYSTEM"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 12, minutes: 144, seconds: 144 };
+      }
+    }
+
+    class VigesimalTimeSystem extends TimeSystem {
+      constructor() {
+        super("vigesimal", "Base 20 Time", 50);
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const totalVigSeconds = Math.floor(dayProgress * (20 * 400 * 400));
+
+        const vigHours = Math.floor(totalVigSeconds / (400 * 400));
+        const vigMinutes = Math.floor((totalVigSeconds % (400 * 400)) / 400);
+        const vigSeconds = Math.floor(totalVigSeconds % 400);
+
+        return {
+          secondDeg: (vigSeconds / 400) * 360,
+          minuteDeg: ((vigMinutes + vigSeconds / 400) / 400) * 360,
+          hourDeg: ((vigHours + vigMinutes / 400) / 20) * 360,
+          displayText: `${vigHours}:${vigMinutes}:${vigSeconds}`,
+          extraInfo: `Vigesimal (20:400:400)`,
+          description: "VIGESIMAL TIME FOLLOWS THE MAYAN BASE-20 SYSTEM, WHICH COUNTED USING BOTH FINGERS AND TOES. THIS ANCIENT MESOAMERICAN APPROACH CREATED SOPHISTICATED CALENDARS AND ASTRONOMICAL CALCULATIONS, DEMONSTRATING AN ALTERNATIVE MATHEMATICAL FOUNDATION FOR TIME.",
+          systemName: "MAYAN VIGESIMAL SYSTEM",
+          systemTitle: "Base 20",
+          systemCategory: "HISTORICAL SYSTEM"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 20, minutes: 400, seconds: 400 };
+      }
+    }
+
+    class FibonacciTimeSystem extends TimeSystem {
+      constructor() {
+        super("fibonacci", "Fibonacci Time (13h:55m:89s)", 108);
+        this.fibHours = 13;
+        this.fibMinutes = 55;
+        this.fibSeconds = 89;
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const totalFibSeconds = Math.floor(
+          dayProgress * (this.fibHours * this.fibMinutes * this.fibSeconds)
+        );
+
+        const hours = Math.floor(totalFibSeconds / (this.fibMinutes * this.fibSeconds));
+        const minutes = Math.floor((totalFibSeconds % (this.fibMinutes * this.fibSeconds)) / this.fibSeconds);
+        const seconds = Math.floor(totalFibSeconds % this.fibSeconds);
+
+        return {
+          secondDeg: (seconds / this.fibSeconds) * 360,
+          minuteDeg: ((minutes + seconds / this.fibSeconds) / this.fibMinutes) * 360,
+          hourDeg: ((hours + minutes / this.fibMinutes) / this.fibHours) * 360,
+          displayText: this.formatDisplay(hours, minutes, seconds),
+          extraInfo: this.getExtraInfo(),
+          description: "FIBONACCI TIME USES CONSECUTIVE NUMBERS FROM THE FIBONACCI SEQUENCE (13, 55, 89), WHERE EACH NUMBER IS THE SUM OF THE PREVIOUS TWO. FOUND THROUGHOUT NATURE IN SPIRALS, BRANCHING PATTERNS, AND GROWTH CYCLES, IT SUGGESTS TIME STRUCTURED BY ORGANIC MATHEMATICAL PRINCIPLES.",
+          systemName: "FIBONACCI NATURAL SEQUENCE SYSTEM",
+          systemTitle: "Base φ (Fib)",
+          systemCategory: "NATURAL SYSTEM"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 13, minutes: 55, seconds: 89 };
+      }
+    }
+
+    class GoldenTimeSystem extends TimeSystem {
+      constructor() {
+        super("golden", "Golden Ratio Time", 132);
+        this.φ = (1 + Math.sqrt(5)) / 2;
+        this.goldenHours = Math.floor(16 * this.φ);
+        this.goldenMinutes = Math.floor(60 * this.φ);
+        this.goldenSeconds = Math.floor(60 * this.φ);
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const totalGoldenSeconds = Math.floor(
+          dayProgress * (this.goldenHours * this.goldenMinutes * this.goldenSeconds)
+        );
+
+        const hours = Math.floor(totalGoldenSeconds / (this.goldenMinutes * this.goldenSeconds));
+        const minutes = Math.floor((totalGoldenSeconds % (this.goldenMinutes * this.goldenSeconds)) / this.goldenSeconds);
+        const seconds = Math.floor(totalGoldenSeconds % this.goldenSeconds);
+
+        return {
+          secondDeg: (seconds / this.goldenSeconds) * 360,
+          minuteDeg: ((minutes + seconds / this.goldenSeconds) / this.goldenMinutes) * 360,
+          hourDeg: ((hours + minutes / this.goldenMinutes) / this.goldenHours) * 360,
+          displayText: this.formatDisplay(hours, minutes, seconds),
+          extraInfo: `${this.baseInfo} (φ ≈ ${this.φ.toFixed(3)})`,
+          description: "GOLDEN RATIO TIME STRUCTURES THE DAY USING φ (PHI), THE DIVINE PROPORTION FOUND IN ANCIENT ARCHITECTURE, RENAISSANCE ART, AND NATURAL FORMS. WITH 25 HOURS AND 97-UNIT SUBDIVISIONS, IT CREATES AESTHETICALLY PLEASING TEMPORAL RELATIONSHIPS.",
+          systemName: "GOLDEN RATIO DIVINE PROPORTION",
+          systemTitle: "Base φ (Golden)",
+          systemCategory: "NATURAL SYSTEM"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 25, minutes: 97, seconds: 97 };
+      }
+    }
+
+    class PiTimeSystem extends TimeSystem {
+      constructor() {
+        super("pi", "π Time System", 314);
+        this.π = Math.PI;
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const piHours = Math.floor(this.π * 10);
+        const piMinutes = Math.floor(this.π * this.π * 10);
+        const piSeconds = Math.floor(this.π * this.π * this.π);
+
+        const totalPiSeconds = Math.floor(dayProgress * (piHours * piMinutes * piSeconds));
+
+        const hours = Math.floor(totalPiSeconds / (piMinutes * piSeconds));
+        const minutes = Math.floor((totalPiSeconds % (piMinutes * piSeconds)) / piSeconds);
+        const seconds = Math.floor(totalPiSeconds % piSeconds);
+
+        return {
+          secondDeg: (seconds / piSeconds) * 360,
+          minuteDeg: ((minutes + seconds / piSeconds) / piMinutes) * 360,
+          hourDeg: ((hours + minutes / piMinutes) / piHours) * 360,
+          displayText: this.formatDisplay(hours, minutes, seconds),
+          extraInfo: `π Time (${piHours}h:${piMinutes}m:${piSeconds}s)`,
+          description: "PI TIME USES THE TRANSCENDENTAL NUMBER π AND ITS POWERS FOR SUBDIVISIONS. AS THE RATIO OF A CIRCLE'S CIRCUMFERENCE TO ITS DIAMETER, π REPRESENTS CIRCULAR GEOMETRY ITSELF—PARTICULARLY APPROPRIATE FOR A CLOCK FACE.",
+          systemName: "PI TRANSCENDENTAL SYSTEM",
+          systemTitle: "Base π",
+          systemCategory: "NATURAL SYSTEM"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return {
+          hours: Math.floor(this.π * 10),
+          minutes: Math.floor(this.π * this.π * 10),
+          seconds: Math.floor(this.π * this.π * this.π)
+        };
+      }
+    }
+
+    class LunarTimeSystem extends TimeSystem {
+      constructor() {
+        super("lunar", "Lunar Time (8:7:28)", 385);
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const totalLunarSeconds = Math.floor(dayProgress * (8 * 7 * 28));
+
+        const hours = Math.floor(totalLunarSeconds / (7 * 28));
+        const minutes = Math.floor((totalLunarSeconds % (7 * 28)) / 28);
+        const seconds = Math.floor(totalLunarSeconds % 28);
+
+        return {
+          secondDeg: (seconds / 28) * 360,
+          minuteDeg: ((minutes + seconds / 28) / 7) * 360,
+          hourDeg: ((hours + minutes / 7) / 8) * 360,
+          displayText: this.formatDisplay(hours, minutes, seconds),
+          extraInfo: `Lunar Phases (8:7:28)`,
+          description: "LUNAR TIME FOLLOWS THE MOON'S EIGHT PHASES. WITH 8 PHASES (NEW, WAXING CRESCENT, FIRST QUARTER, WAXING GIBBOUS, FULL, WANING GIBBOUS, LAST QUARTER, WANING CRESCENT), 7-DAY QUARTERS, AND 28-DAY CYCLES, IT ALIGNS TIMEKEEPING WITH THE COMPLETE LUNAR RHYTHM THAT HAS GOVERNED TIDES, AGRICULTURE, AND HUMAN CYCLES FOR MILLENNIA.",
+          systemName: "LUNAR EIGHT-PHASE SYSTEM",
+          systemTitle: "Base ☾",
+          systemCategory: "NATURAL SYSTEM"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 8, minutes: 7, seconds: 28 };
+      }
+    }
+
+    class FingerCountingTimeSystem extends TimeSystem {
+      constructor() {
+        super("finger", "Finger Counting Time (12:5:60)", 1440);
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const totalFingerSeconds = Math.floor(dayProgress * (12 * 5 * 60));
+
+        const hours = Math.floor(totalFingerSeconds / (5 * 60));
+        const minutes = Math.floor((totalFingerSeconds % (5 * 60)) / 60);
+        const seconds = Math.floor(totalFingerSeconds % 60);
+
+        return {
+          secondDeg: (seconds / 60) * 360,
+          minuteDeg: ((minutes + seconds / 60) / 5) * 360,
+          hourDeg: ((hours + minutes / 5) / 12) * 360,
+          displayText: this.formatDisplay(hours, minutes, seconds),
+          extraInfo: `Babylonian Method (12:5:60)`,
+          description: "BABYLONIAN FINGER COUNTING IS THE ORIGIN OF BASE-60 TIME. THE RIGHT HAND'S THUMB COUNTS ACROSS 12 FINGER SEGMENTS (3 SEGMENTS × 4 FINGERS). THE LEFT HAND TRACKS HOW MANY TIMES YOU'VE COUNTED TO 12, USING ITS 5 FINGERS. TWELVE TIMES FIVE EQUALS SIXTY. THIS PHYSICAL COUNTING METHOD, USED BY ANCIENT MERCHANTS AND ASTRONOMERS, BECAME THE FOUNDATION OF OUR MODERN TIMEKEEPING.",
+          systemName: "BABYLONIAN FINGER-COUNTING SYSTEM",
+          systemTitle: "Finger Count",
+          systemCategory: "ANATOMICAL SYSTEM"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 12, minutes: 5, seconds: 60 };
+      }
+    }
+
+    class HarmonicTimeSystem extends TimeSystem {
+      constructor() {
+        super("harmonic", "Harmonic Time", 440);
+        this.notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const harmonicHours = 12;
+        const harmonicMinutes = 12;
+        const harmonicSeconds = 12;
+
+        const totalHarmonicSeconds = Math.floor(
+          dayProgress * (harmonicHours * harmonicMinutes * harmonicSeconds)
+        );
+
+        const hours = Math.floor(totalHarmonicSeconds / (harmonicMinutes * harmonicSeconds));
+        const minutes = Math.floor((totalHarmonicSeconds % (harmonicMinutes * harmonicSeconds)) / harmonicSeconds);
+        const seconds = Math.floor(totalHarmonicSeconds % harmonicSeconds);
+
+        // Store note indices for audio system
+        this.currentNoteIndices = [hours, minutes, seconds];
+
+        const chord = this.analyzeChord(hours, minutes, seconds);
+
+        return {
+          secondDeg: (seconds / harmonicSeconds) * 360,
+          minuteDeg: ((minutes + seconds / harmonicSeconds) / harmonicMinutes) * 360,
+          hourDeg: ((hours + minutes / harmonicMinutes) / harmonicHours) * 360,
+          displayText: `${this.notes[hours]}:${this.notes[minutes]}:${this.notes[seconds]}`,
+          extraInfo: chord,
+          description: "HARMONIC TIME FOLLOWS THE CHROMATIC SCALE FROM WESTERN MUSIC THEORY. BASED ON MATHEMATICAL RATIOS THAT CREATE CONSONANT MUSICAL INTERVALS, EACH MOMENT FORMS A CHORD. THE DAY BECOMES A COMPOSITION, TIME BECOMES SOUND, AND HOURS MINUTES SECONDS HARMONIZE INTO AN EVER-CHANGING DRONE.",
+          systemName: "MUSICAL HARMONIC SYSTEM",
+          systemTitle: "Base 12 (♪)",
+          systemCategory: "EXPERIMENTAL SYSTEM",
+          noteIndices: [hours, minutes, seconds]
+        };
+      }
+
+      analyzeChord(h, m, s) {
+        const intervals = [
+          Math.abs(m - h),
+          Math.abs(s - m),
+          Math.abs(s - h)
+        ].sort((a, b) => a - b);
+
+        // Detect common chord types
+        if (intervals[0] === 3 && intervals[1] === 4) return "Minor Triad";
+        if (intervals[0] === 4 && intervals[1] === 3) return "Major Triad";
+        if (intervals[0] === 3 && intervals[1] === 3) return "Diminished";
+        if (intervals[0] === 4 && intervals[1] === 4) return "Augmented";
+        if (intervals[0] === 5) return "Perfect Fourth";
+        if (intervals[0] === 7) return "Perfect Fifth";
+        
+        return "Atonal";
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 12, minutes: 12, seconds: 12 };
+      }
+    }
+
+    class QuantumTimeSystem extends TimeSystem {
+      constructor() {
+        super("quantum", "Quantum Probability Time", 50);
+        this.uncertaintyScale = {
+          hours: 0.1,
+          minutes: 0.2,
+          seconds: 0.3,
+        };
+      }
+
+      calculateTime(date) {
+        const regular = this.getRegularTime(date);
+        const uncertainties = this.calculateUncertainties(regular);
+        const { hourDeg, minuteDeg, secondDeg } = this.calculateHandPositions(regular, uncertainties);
+        const displayText = this.formatQuantumState(regular, uncertainties);
+
+        return {
+          secondDeg,
+          minuteDeg,
+          hourDeg,
+          displayText,
+          extraInfo: this.getQuantumInfo(uncertainties),
+          description: "QUANTUM TIME APPLIES HEISENBERG'S UNCERTAINTY PRINCIPLE TO TIMEKEEPING. CLOCK HANDS EXIST IN PROBABILISTIC STATES RATHER THAN FIXED POSITIONS, WITH UNCERTAINTY INCREASING FROM HOURS TO SECONDS. THIS REFLECTS THE FUNDAMENTAL INDETERMINACY OF QUANTUM MECHANICS.",
+          systemName: "QUANTUM PROBABILISTIC SYSTEM",
+          systemTitle: "Base Ψ",
+          systemCategory: "EXPERIMENTAL SYSTEM"
+        };
+      }
+
+      getRegularTime(date) {
+        return {
+          hours: date.getHours() % 12,
+          minutes: date.getMinutes(),
+          seconds: date.getSeconds(),
+          milliseconds: date.getMilliseconds(),
+        };
+      }
+
+      calculateUncertainties(time) {
+        const timeFactors = {
+          hours: Math.sin((time.hours * Math.PI) / 12) * 0.5 + 1,
+          minutes: Math.sin((time.minutes * Math.PI) / 30) * 0.5 + 1,
+          seconds: Math.sin((time.seconds * Math.PI) / 30) * 0.5 + 1,
+        };
+
+        return {
+          hours: this.uncertaintyScale.hours * timeFactors.hours,
+          minutes: this.uncertaintyScale.minutes * timeFactors.minutes,
+          seconds: this.uncertaintyScale.seconds * timeFactors.seconds,
+        };
+      }
+
+      calculateHandPositions(time, uncertainties) {
+        const jitter = (base, uncertainty) => {
+          const randomFactor = (Math.random() - 0.5) * uncertainty;
+          return (base + randomFactor + 360) % 360;
+        };
+
+        return {
+          hourDeg: jitter((time.hours * 30 + time.minutes / 2) % 360, uncertainties.hours * 30),
+          minuteDeg: jitter((time.minutes * 6 + time.seconds / 10) % 360, uncertainties.minutes * 6),
+          secondDeg: jitter(time.seconds * 6, uncertainties.seconds * 6),
+        };
+      }
+
+      formatQuantumState(time, uncertainties) {
+        const formatComponent = (value, uncertainty) => {
+          const delta = Math.round(uncertainty * 100) / 100;
+          return `${value.toString().padStart(2, "0")}±${delta}`;
+        };
+
+        return `${formatComponent(time.hours, uncertainties.hours)}:${formatComponent(
+          time.minutes,
+          uncertainties.minutes
+        )}:${formatComponent(time.seconds, uncertainties.seconds)}`;
+      }
+
+      getQuantumInfo(uncertainties) {
+        return `${this.baseInfo} | Δt(h):${uncertainties.hours.toFixed(3)} Δt(m):${uncertainties.minutes.toFixed(
+          3
+        )} Δt(s):${uncertainties.seconds.toFixed(3)}`;
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 24, minutes: 60, seconds: 60 };
+      }
+    }
+
+    class PrimeTimeSystem extends TimeSystem {
+      constructor() {
+        super("prime", "Prime Time (2,3,5)", 1000);
+      }
+
+      calculateTime(date) {
+        const dayProgress = this.getDayProgress(date);
+        const totalPrimeSeconds = Math.floor(dayProgress * (2 * 3 * 5));
+
+        const primeHours = Math.floor(totalPrimeSeconds / (3 * 5));
+        const primeMinutes = Math.floor((totalPrimeSeconds % (3 * 5)) / 5);
+        const primeSeconds = Math.floor(totalPrimeSeconds % 5);
+
+        return {
+          secondDeg: (primeSeconds / 5) * 360,
+          minuteDeg: ((primeMinutes + primeSeconds / 5) / 3) * 360,
+          hourDeg: ((primeHours + primeMinutes / 3) / 2) * 360,
+          displayText: this.formatDisplay(primeHours, primeMinutes, primeSeconds),
+          extraInfo: `Prime Numbers (2h:3m:5s)`,
+          description: "PRIME TIME USES THE FIRST THREE PRIME NUMBERS (2, 3, 5) AS SUBDIVISIONS. PRIMES ARE NUMBERS DIVISIBLE ONLY BY THEMSELVES AND ONE—THE FUNDAMENTAL BUILDING BLOCKS OF MATHEMATICS. THIS CREATES A MINIMAL, MATHEMATICALLY PURE TIME SYSTEM.",
+          systemName: "PRIME NUMBER FUNDAMENTAL SYSTEM",
+          systemTitle: "Base p′",
+          systemCategory: "MATHEMATICAL SYSTEM"
+        };
+      }
+
+      getTimeSubdivisions() {
+        return { hours: 2, minutes: 3, seconds: 5 };
+      }
+    }
+
+    // ===== CONTEXTUAL VISUALIZATIONS =====
+    
+    function renderContextualViz(systemName, timeData) {
+      const vizContainer = document.getElementById('contextualViz');
+      const divider = document.getElementById('contextualDivider');
+      
+      // Clear previous content
+      vizContainer.innerHTML = '';
+      
+      switch(systemName) {
+        case 'harmonic':
+          renderMusicalStaff(timeData);
+          divider.style.display = 'block';
+          break;
+          
+        case 'quantum':
+          renderUncertaintyBars(timeData);
+          divider.style.display = 'block';
+          break;
+          
+        case 'finger':
+          renderHandDiagram(timeData);
+          divider.style.display = 'block';
+          break;
+          
+        case 'lunar':
+          renderLunarPhases(timeData);
+          divider.style.display = 'block';
+          break;
+          
+        case 'binary':
+          renderBinaryDots(timeData);
+          divider.style.display = 'block';
+          break;
+          
+        case 'hexadecimal':
+          renderHexDisplay(timeData);
+          divider.style.display = 'block';
+          break;
+          
+        case 'vigesimal':
+          renderMayanNotation(timeData);
+          divider.style.display = 'block';
+          break;
+          
+        default:
+          // No visualization for this system
+          divider.style.display = 'none';
+          break;
+      }
+    }
+    
+    function renderMusicalStaff(timeData) {
+      const vizContainer = document.getElementById('contextualViz');
+      
+      if (!timeData.noteIndices) return;
+      
+      const html = `
+        <div class="musical-staff">
+          <canvas id="staffCanvas" width="280" height="120"></canvas>
+          <div class="chord-name">${timeData.extraInfo}</div>
+        </div>
+      `;
+      
+      vizContainer.innerHTML = html;
+      
+      setTimeout(() => {
+        drawMusicalStaffPixelated(timeData);
+      }, 0);
+    }
+
+    function drawMusicalStaffPixelated(timeData) {
+      const canvas = document.getElementById('staffCanvas');
+      if (!canvas) return;
+      
+      const displayWidth = 280;
+      const displayHeight = 120;
+      const hiResScale = 2;
+      
+      // High-res canvas
+      const hiResCanvas = document.createElement('canvas');
+      hiResCanvas.width = displayWidth * hiResScale;
+      hiResCanvas.height = displayHeight * hiResScale;
+      const hiResCtx = hiResCanvas.getContext('2d');
+      
+      // First, draw the staff SVG
+      const staffSvg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1005.24 519.94">
+  <path d="M147.39.69c-1.33.47-3.47,1.47-4.75,2.23-3.28,1.9-9.54,8.45-13.05,13.67-5.32,7.97-11.06,20.79-14.53,32.37l-1.38,4.65-38.21-.28c-21.03-.14-46.62-.43-56.82-.57l-18.66-.28v350.76l46.66.05c56.68.09,119.01.62,119.01,1,0,.19.52,3.32,1.19,6.93,1.66,9.49,5.27,33.42,6.22,41.54,1.23,10.21,1.14,20.93-.19,26.35-4.37,17.47-18.7,29-37.12,30-11.92.62-21.74-4.37-24.11-12.2-1.23-4.22-1.23-4.27.71-4.27,5.74-.05,12.77-2.94,17.42-7.22,5.41-4.94,8.21-10.78,8.69-17.94.71-11.63-6.17-22.17-17.33-26.44-4.27-1.66-11.73-2.04-16.23-.85-5.6,1.42-8.88,3.66-17.14,11.44-5.03,4.7-7.83,12.91-8.35,24.16-.28,6.27.33,9.92,2.42,14.62,5.84,13.24,22.17,24.4,41.58,28.39,7.5,1.52,19.04,1.57,25.49.05,19.94-4.6,32.42-18.42,36.08-39.87,1.19-7.03,1.09-20.27-.24-29.76-1.28-9.07-4.32-27.53-6.22-37.74-.76-4.03-1.33-7.41-1.23-7.5.14-.14,64.18.14,289.33,1.33,48.7.28,99.07.47,111.93.47h423.36v-4.18l-427.15-.28c-27.53-.28-189.31-1.04-318.43-1.47-38.78-.14-72.68-.38-75.34-.52l-4.79-.28-.57-3.04c-.33-1.71-.52-3.13-.43-3.23s2.66-1.33,5.65-2.8c14.86-7.17,25.87-17.9,32.94-32.04,5.13-10.16,7.64-20.22,8.21-32.8l.28-6.84,65.79.33c89.62.43,240.1,1.14,279.17,1.33l432.04.14.14-2.18.14-2.18-449.75-.33c-27.34-.14-99.31-.52-159.88-.76s-123.19-.62-139.18-.76l-29.05-.28-.52-3.42c-4.98-30.9-24.73-53.36-50.98-57.96-4.84-.81-13.39-.95-18.42-.24-1.9.28-3.89.57-4.37.62-.81.09-1.14-1.04-3.18-10.82-1.23-6.03-2.14-11.01-1.95-11.16s30.67-.09,67.74.05c37.07.19,115.02.57,173.27.85s131.97.66,163.91.81l458.01.33v-4.32l-418.13-.28c-10.02-.14-70.64-.47-134.72-.76-165.43-.71-311.12-1.47-311.31-1.66-.09-.05-1.19-5.41-2.42-11.92l-2.33-11.82,4.6-4.98c10.3-11.2,15.9-18.56,21.88-28.67,3.09-5.22,8.64-16.61,10.06-20.6l1.09-2.99,38.93.28c49.75.38,207.92,1.09,306.89,1.42,42.15.14,478.09.38,479.89.47l3.18.24v-4.65l-449.46-.28c-45.76-.28-137.62-.76-309.32-1.52-62.38-.28-68.45-.38-68.21-1.09,5.98-19.46,8.21-37.41,7.64-61.66-.14-7.5-.43-15-.57-16.66l-.33-2.99,44.57.28c24.54.19,87.39.52,139.75.76s125.8.62,163.2.76l467.98.33v-4.32l-427.15-.28c-14.95-.14-81.65-.52-148.25-.81-66.55-.28-147.96-.66-180.86-.85l-59.76-.28-1.71-8.31c-2.09-10.16-3.28-14.38-5.98-21.12C168.38,8.9,160.88.59,152.62.02c-1.95-.09-3.61.09-5.22.66ZM162.25,47.16c2.23,1.09,3.66,2.61,5.51,5.74.28.47-2.18.62-11.68.62l-12.01-.05,2.14-1.9c3.94-3.51,8.26-5.55,11.92-5.6.9-.05,2.8.52,4.13,1.19ZM112.46,58.08c.09.09-.14,1.95-.57,4.08-3.85,19.7-3.47,33.28,1.8,66.55.9,5.7,1.66,10.54,1.66,10.78,0,.52-27.39.57-67.5.09l-28.86-.28v-40.68c0-22.36.09-40.78.19-40.87.24-.24,93.04.05,93.28.33ZM170.09,60.17c.24.9.43,5.6.47,10.44,0,7.31-.14,9.59-1,13.58-3.37,15.81-11.49,30.9-26.82,49.89l-4.7,5.84h-12.58l-.81-6.79c-2.52-21.6,1.28-46.52,9.73-64.42,1.33-2.75,3.18-6.22,4.13-7.74l1.76-2.71,14.72.09,14.67.14.43,1.66ZM116.02,144.71c.19.14.9,3.8,1.66,8.07l1.38,7.79-8.64,9.02c-25.25,26.3-35.46,37.98-44.53,50.84l-3.47,4.89-21.69.05h-21.74v-81.27l48.37.19c26.63.05,48.51.28,48.66.43ZM131.3,147.47c-1.47,1.52-2.99,3.13-3.32,3.61-.57.81-.71.52-1.19-2.23-.28-1.66-.52-3.32-.52-3.61,0-.38,1.23-.57,3.85-.57h3.85l-2.66,2.8ZM129.64,217.15c.71,3.85,1.33,7.41,1.38,7.83,0,.81-.81.85-10.21.85-5.6,0-10.21-.14-10.16-.38.05-.43,17.23-15.67,17.47-15.48.05.05.76,3.28,1.52,7.17ZM46.09,229.97l13.15.28-1.95,3.13c-7.07,11.54-13.2,27.06-15.62,39.69-1.71,9.02-1.76,26.77-.05,37.83l.28,1.8h-22.93v-83.07h7.03c3.85,0,12.86.14,20.08.33ZM134.63,242.93c1.38,6.93,2.42,12.63,2.37,12.72-.09.05-2.14,1.04-4.51,2.23-8.59,4.18-16.19,9.87-21.84,16.42-9.21,10.68-14.53,22.55-15.52,34.94l-.33,3.94-16.19-.09-16.19-.14.14-5.46c.38-13.77,3.28-25.49,9.16-37.07,5.65-11.06,11.54-18.7,24.3-31.43l8.92-8.88,13.62.09,13.62.14,2.42,12.58ZM161.49,286.32c13.01,2.56,22.93,10.4,29.76,23.5l1.99,3.85h-17.09c-9.45,0-17.14-.09-17.14-.19s-1.28-6.31-2.85-13.81-2.85-13.72-2.85-13.81c0-.43,4.98-.14,8.16.47ZM143.6,288.59c.19.85,1.33,6.69,2.56,12.96s2.23,11.49,2.14,11.63c-.05.14-6.93.19-15.29.09l-15.24-.14.66-1.9c1.95-5.46,4.7-9.68,9.49-14.48,4.22-4.27,5.27-5.08,9.73-7.26,2.75-1.33,5.13-2.42,5.32-2.42s.47.71.62,1.52ZM44.15,322.92c3.89,15.05,10.44,29,18.99,40.35,15,19.94,35.7,31.9,60.76,35.13,5.03.62,2.52.66-32.04.47-20.6-.14-45.48-.24-55.16-.24h-17.71v-81.17l11.92.09,11.92.14,1.33,5.22ZM95.51,320.49c.9,7.26,4.46,15.81,9.3,22.41,5.79,7.83,15.57,15.81,26.25,21.31,2.28,1.19,4.27,2.14,4.37,2.14.14,0,.71-.62,1.23-1.38l1-1.38-3.85-3.7c-6.31-6.17-11.68-13.81-14.38-20.65-2.37-6.03-3.56-13.58-2.94-18.66l.33-2.66h32.56l1.23,6.27c11.3,58.44,11.58,60.14,10.73,60.67-1,.66-8.16,2.23-12.63,2.85-4.89.66-15.95.66-20.32.05-17.33-2.52-32.71-9.64-43.96-20.36-12.53-11.92-19.61-27.25-21.6-46.76l-.28-3.18,16.28.09,16.33.14.33,2.8ZM195.39,320.3c2.42,8.16,2.71,21.03.66,28.96-2.37,8.97-6.65,16.61-12.82,22.79-3.13,3.13-10.25,8.5-10.63,8.02-.09-.09-1.14-5.32-2.37-11.58-2.28-11.58-9.64-47.57-10.11-49.51l-.24-1.04,17.42.09,17.47.14.62,2.14ZM164.25,396.59c0,.24.14.85.28,1.42l.28,1.09-10.35-.05c-8.92-.09-9.78-.14-6.03-.47,4.41-.38,13.01-1.76,13.39-2.14.33-.33,2.42-.19,2.42.14Z"/>
+</svg>`;
+      
+      const img = new Image();
+      img.onload = () => {
+        // Draw staff as background (scaled to fit)
+        const staffHeight = displayHeight * hiResScale * 0.85;
+        const staffWidth = (staffHeight * 1005.24) / 519.94; // maintain aspect ratio
+        const staffX = (displayWidth * hiResScale * 0.15);
+const staffY = (displayHeight * hiResScale - staffHeight) / 2;
+        
+        hiResCtx.globalAlpha = 1;
+        hiResCtx.drawImage(img, staffX, staffY, staffWidth, staffHeight);
+        hiResCtx.globalAlpha = 1;
+        
+        // Note positions (Y coordinates relative to staff)
+        // The staff in the SVG has 5 lines, we'll map notes to these positions
+        const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const [h, m, s] = timeData.noteIndices;
+        
+        // Y positions for each note (lower number = higher on staff)
+        // These are relative positions, with middle C being in the middle
+        const noteYPositions = {
+          'C': 0.85,   // Below staff
+          'C#': 0.80,
+          'D': 0.75,   // Below staff
+          'D#': 0.70,
+          'E': 0.65,   // Bottom line
+          'F': 0.60,   // First space
+          'F#': 0.55,
+          'G': 0.50,   // Second line
+          'G#': 0.45,
+          'A': 0.40,   // Second space
+          'A#': 0.35,
+          'B': 0.30    // Third line (middle of staff)
+        };
+        
+        // Draw three notes (hours, minutes, seconds)
+        const notePositions = [
+  { note: notes[h], x: 0.35, label: 'H' },
+  { note: notes[m], x: 0.58, label: 'M' },
+  { note: notes[s], x: 0.81, label: 'S' }
+];
+        
+        notePositions.forEach(({ note, x, label }) => {
+          const noteX = staffX + staffWidth * x;
+          const noteY = staffY + staffHeight * noteYPositions[note];
+          const noteRadius = 6 * hiResScale;
+          
+          // Draw note
+          hiResCtx.fillStyle = '#0a0a0a';
+          hiResCtx.beginPath();
+          hiResCtx.ellipse(noteX, noteY, noteRadius * 1.2, noteRadius, 0, 0, Math.PI * 2);
+          hiResCtx.fill();
+          
+          // Draw stem (going up or down depending on position)
+          const stemHeight = 25 * hiResScale;
+          if (noteYPositions[note] > 0.5) {
+            // Note below middle - stem goes up
+            hiResCtx.fillRect(noteX + noteRadius, noteY - stemHeight, 1.5 * hiResScale, stemHeight);
+          } else {
+            // Note above middle - stem goes down
+            hiResCtx.fillRect(noteX - noteRadius, noteY, 1.5 * hiResScale, stemHeight);
+          }
+          
+          // Draw label below
+          hiResCtx.fillStyle = 'rgba(10,10,10,0.6)';
+          hiResCtx.font = `${12 * hiResScale}px VT323`;
+          hiResCtx.textAlign = 'center';
+          hiResCtx.fillText(label + ':' + note, noteX, staffY + staffHeight + 15 * hiResScale);
+        });
+        
+        // Apply pixelation
+        applyPixelation(hiResCanvas, canvas, 0.22);
+      };
+      
+      img.src = 'data:image/svg+xml;base64,' + btoa(staffSvg);
+    }
+    
+    function renderUncertaintyBars(timeData) {
+      const vizContainer = document.getElementById('contextualViz');
+      
+      // Extract uncertainty values from extraInfo
+      const infoText = timeData.extraInfo || '';
+      const hMatch = infoText.match(/Δt\(h\):([0-9.]+)/);
+      const mMatch = infoText.match(/Δt\(m\):([0-9.]+)/);
+      const sMatch = infoText.match(/Δt\(s\):([0-9.]+)/);
+      
+      if (!hMatch || !mMatch || !sMatch) return;
+      
+      const hUncertainty = parseFloat(hMatch[1]);
+      const mUncertainty = parseFloat(mMatch[1]);
+      const sUncertainty = parseFloat(sMatch[1]);
+      
+      // Normalize to percentage (max uncertainty is ~0.3)
+      const maxU = 0.3;
+      const hPct = (hUncertainty / maxU) * 100;
+      const mPct = (mUncertainty / maxU) * 100;
+      const sPct = (sUncertainty / maxU) * 100;
+      
+      const html = `
+        <div class="uncertainty-bars">
+          <div class="uncertainty-row">
+            <span class="uncertainty-label">HOURS</span>
+            <div class="uncertainty-bar">
+              <div class="uncertainty-fill" style="width: ${hPct}%"></div>
+            </div>
+            <span class="uncertainty-value">±${hUncertainty.toFixed(3)}</span>
+          </div>
+          <div class="uncertainty-row">
+            <span class="uncertainty-label">MINUTES</span>
+            <div class="uncertainty-bar">
+              <div class="uncertainty-fill" style="width: ${mPct}%"></div>
+            </div>
+            <span class="uncertainty-value">±${mUncertainty.toFixed(3)}</span>
+          </div>
+          <div class="uncertainty-row">
+            <span class="uncertainty-label">SECONDS</span>
+            <div class="uncertainty-bar">
+              <div class="uncertainty-fill" style="width: ${sPct}%"></div>
+            </div>
+            <span class="uncertainty-value">±${sUncertainty.toFixed(3)}</span>
+          </div>
+        </div>
+      `;
+      
+      vizContainer.innerHTML = html;
+    }
+    
+    function renderHandDiagram(timeData) {
+      const vizContainer = document.getElementById('contextualViz');
+      
+      const html = `
+        <div class="hand-diagram">
+          <canvas id="handCanvas" width="320" height="140"></canvas>
+          <div class="hand-labels">
+            <span>LEFT: ${timeData.displayText.split(':')[1]}/5 FINGERS</span>
+            <span>RIGHT: ${timeData.displayText.split(':')[0]}/12 SEGMENTS</span>
+          </div>
+        </div>
+      `;
+      
+      vizContainer.innerHTML = html;
+      
+      setTimeout(() => {
+        drawHandDiagramPixelated(timeData);
+      }, 0);
+    }
+    
+    // FIXED FINGER COUNTING - Direct coordinate extraction from SVG classes
+
+function drawHandDiagramPixelated(timeData) {
+  const canvas = document.getElementById('handCanvas');
+  if (!canvas) return;
+  
+  const displayWidth = 320;
+  const displayHeight = 140;
+  const hiResScale = 3;
+  
+  // Parse current time values
+  const [hours, minutes] = timeData.displayText.split(':').map(v => parseInt(v));
+  
+  // High-res canvas
+  const hiResCanvas = document.createElement('canvas');
+  hiResCanvas.width = displayWidth * hiResScale;
+  hiResCanvas.height = displayHeight * hiResScale;
+  const hiResCtx = hiResCanvas.getContext('2d');
+  
+  // Your labeled SVG
+  const handSvg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1218.19 791.99">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: #fff;
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: 10px;
+      }
+      
+      .cls-3 {
+        opacity: .0;
+      }
+    </style>
+  </defs>
+  <g>
+    <path class="cls-2 HandOutlineLeft" d="M565.05,146.1c-38.82-59.62-100,216.76-121.83,150.89-2.67-22.98,2.79-49.97,5.3-73.37,6.14-55.54,18.49-112.57,17.84-168.44-.69-20.81-17.39-41.38-38.34-27.48-11.59,8.56-13.23,24.02-17.5,38.87-7.96,25.45-11.8,47.7-13.44,74.9-6.2,52.52-12.81,142.86-35.94,140.71-11.5-7.87-7.76-39.33-10.23-53.07-1.49-28.72-5.38-58.02-8.05-86.77-.95-16.25.99-33.58-.06-50.34-2.17-22.62-2.67-45.3-6.1-67.7-3.78-24.4-33.5-28.92-47.63-10.53-13.43,19.49-8.61,46.66-8.19,69.92,2.1,35.69.13,72.32,1.66,107.67,1.39,25.25,8.61,53.44,5.22,78.72-2.51,12.91-13.39,16.79-22.77,7.25-13.9-16.3-22.24-38.31-31.35-57.51-15.02-36.39-32.39-73.61-50.14-109.89-7.64-15.52-15.64-51.39-39.03-38.75-14.81,12.16-10.24,36.91-7.5,53.95,10.43,60.29,41.57,121.47,66,177.65,2.84,7.4,4.77,14.92,5.61,22.75,1.62,23.64-.67,48.89.24,72.92-.51,17.93,2.62,35.78-.46,53.23-9.76,32.73-49.86-15.88-62.96-25.97-17.34-14.79-28.58-34.04-45.77-48.54-18.72-13.98-45.34-21.42-69.06-18.37-12.95,1.61-28.96,9.72-28.04,23.59,2.13,14.11,20.66,20.16,30.95,28.39,11.63,8.7,20.21,19.43,31.34,27.76,13.57,10.38,29.39,18.12,40.33,31.68,15.96,17.92,22.51,40.4,37.68,58.99,15.1,17.21,32,34.08,44.86,53.81,8.22,11.7,16.27,21.76,27.04,31.1,10.48,10.01,24.04,20.34,29.1,34.07,4.95,15.5-.08,32.57-1.38,48.45-1.89,14.54-.42,29.22-1.86,43.84.81,13.45-15.03,41.65,1.38,47.52,15.47,3.33,35.35.03,51.95,0,36.44-.72,71.74-7.16,107.51-12.73,15.02-2.17,30.72-4.29,45.41-7.43,11.88-2.43,21.41-7.9,21.22-21.26-.3-24.54-8.49-50.44-3.89-74.85,2.01-10.51,5.9-20.41,7.83-31.05,3.15-17.1,2.77-34.96,6.86-51.92,6.1-23.22,16.63-44.68,19.51-68.7,8.48-53.23,1.22-110.89,4.72-162.55,1.2-13.27,5.36-25.82,10.98-37.91,16.4-35.2,33.52-71.38,46.5-107.84,6.9-19.77,17.25-46.76,4.54-65.54l-.09-.12Z"/>
+    <g>
+      <polygon class="cls-1 ThumbLeft1" points="116.14 404.99 30.14 367.37 22.46 390.45 88.71 437.32 173.24 530.5 193.53 477.91 116.14 404.99"/>
+      <polygon class="cls-1 PointerLeft2" points="219.25 215.93 190.09 152.15 162.27 85.14 137.22 96.7 163.92 164.57 189.32 230.57 216.5 316.09 255.94 295.17 219.25 215.93"/>
+      <polygon class="cls-1 MiddleLeft3" points="335.63 186.54 329.51 99.37 323.95 20.12 291.69 22.39 293.85 101.87 299.97 189.04 306.19 277.71 341.85 275.21 335.63 186.54"/>
+      <polygon class="cls-1 IndexLeft4" points="428.4 36.69 412.85 115.14 402.73 189.79 386.42 282 429.24 296.79 440.52 201.36 449.59 127.92 458.51 44.25 428.4 36.69"/>
+      <polygon class="cls-1 PinkeyLeft5" points="543.2 150.08 517.73 203.39 495.7 255.77 469.38 312.44 498.93 334.49 522.87 276.65 542.91 220.91 565.46 159.15 543.2 150.08"/>
+    </g>
+  </g>
+  <g>
+    <path class="cls-2 HandOutlineRight" d="M647.1,153.59c37.22-60.63,105.71,214.03,125.79,147.61,2.06-23.04-4.11-49.88-7.24-73.2-7.61-55.36-21.47-112.04-22.3-167.91.13-20.82,16.29-41.83,37.6-28.49,11.81,8.25,13.86,23.66,18.52,38.39,8.63,25.23,13.06,47.37,15.42,74.52,7.59,52.34,16.59,142.47,39.66,139.71,11.29-8.17,6.72-39.53,8.82-53.32.73-28.75,3.84-58.14,5.75-86.95.52-16.27-1.88-33.54-1.27-50.32,1.57-22.67,1.46-45.36,4.3-67.84,3.13-24.5,32.72-29.79,47.34-11.79,13.94,19.13,9.85,46.42,10.04,69.67-1.16,35.73,1.79,72.3,1.19,107.68-.72,25.28-7.19,53.65-3.13,78.83,2.85,12.84,13.83,16.43,22.95,6.65,13.46-16.66,21.22-38.88,29.82-58.32,14.05-36.78,30.42-74.45,47.21-111.18,7.23-15.71,14.27-51.79,37.99-39.77,15.13,11.77,11.21,36.62,8.93,53.73-8.83,60.54-38.33,122.53-61.27,179.34-2.65,7.47-4.38,15.05-5.01,22.89-1,23.68,1.97,48.85,1.69,72.9.99,17.91-1.67,35.83,1.87,53.2,10.62,32.46,49.42-17.2,62.24-27.63,16.94-15.25,27.67-34.79,44.46-49.74,18.34-14.47,44.75-22.62,68.55-20.19,12.99,1.26,29.21,8.95,28.66,22.84-1.76,14.16-20.11,20.7-30.18,29.2-11.4,9-19.69,19.96-30.59,28.58-13.29,10.73-28.9,18.89-39.48,32.74-15.48,18.33-21.43,40.98-36.1,59.96-14.64,17.61-31.08,34.91-43.42,54.98-7.91,11.92-15.69,22.18-26.21,31.81-10.21,10.28-23.49,20.97-28.18,34.83-4.54,15.63.95,32.56,2.67,48.4,2.27,14.49,1.2,29.2,3.02,43.77-.45,13.47,16.13,41.24-.12,47.54-15.38,3.74-35.34.97-51.93,1.37-36.45.25-71.91-5.26-107.81-9.87-15.07-1.77-30.82-3.48-45.6-6.22-11.94-2.12-21.61-7.33-21.78-20.69-.36-24.54,7.15-50.64,1.9-74.92-2.29-10.45-6.44-20.25-8.65-30.83-3.6-17.01-3.69-34.87-8.23-51.72-6.71-23.05-17.81-44.22-21.33-68.16-9.89-52.98-4.16-110.81-9.03-162.37-1.55-13.23-6.05-25.66-11.98-37.6-17.33-34.75-35.41-70.47-49.34-106.57-7.42-19.58-18.49-46.28-6.28-65.4l.08-.12Z"/>
+    <g>
+      <polygon class="cls-1 PointerRightBottomC" points="1024.94 228.07 994.63 214.23 960.05 294.41 1000.04 314.27 1024.94 228.07"/>
+      <polygon class="cls-1 PointerRightMiddleB" points="1048.57 161.41 1022.09 149.7 994.63 214.23 1024.94 228.07 1048.57 161.41"/>
+      <polygon class="cls-1 PointerRightTopA" points="1073.47 92.86 1048.12 81.97 1022.09 149.7 1048.57 161.41 1073.47 92.86"/>
+    </g>
+    <g>
+      <polygon class="cls-1 MiddleRightTop7" points="917.08 22.67 884.77 21.26 881.32 100.63 917.03 102.18 917.08 22.67"/>
+      <rect class="cls-1 MiddleRightMiddle8" x="853.58" y="127.18" width="87.38" height="35.75" transform="translate(713.33 1035.17) rotate(-87.51)"/>
+      <rect class="cls-1 MiddleRightBottom9" x="848.99" y="215.23" width="88.89" height="35.75" transform="translate(621.7 1115.56) rotate(-87.51)"/>
+    </g>
+    <g>
+      <polygon class="cls-1 IndexRightTop4" points="780.8 40.59 750.91 48.95 762.04 132.35 798.42 118.6 780.8 40.59"/>
+      <polygon class="cls-1 IndexRightMiddle5" points="773.05 205.53 810.52 192.96 798.42 118.6 762.04 132.35 773.05 205.53"/>
+      <polygon class="cls-1 IndexRightBottom6" points="786.85 300.62 773.05 205.53 810.52 192.96 829.27 284.7 786.85 300.62"/>
+    </g>
+    <g>
+      <polygon class="cls-1 PinkeyRightbottom3" points="747.15 317.33 719.34 261.38 692.73 282.97 718.2 340.16 747.15 317.33"/>
+      <polygon class="cls-1 PinkeyRightmiddle2" points="695.92 209.61 671.21 227.78 692.73 282.97 719.34 261.38 695.92 209.61"/>
+      <polygon class="cls-1 PinkeyRightTop1" points="647.04 166.64 671.21 227.78 695.92 209.61 669.04 156.99 647.04 166.64"/>
+    </g>
+  </g>
+</svg>`;
+  
+  const img = new Image();
+  img.onload = () => {
+    // Draw base hands very lightly
+    hiResCtx.globalAlpha = 0.08;
+    hiResCtx.drawImage(img, 0, 0, displayWidth * hiResScale, displayHeight * hiResScale);
+    hiResCtx.globalAlpha = 1;
+    
+    const scaleX = (displayWidth * hiResScale) / 1218.19;
+    const scaleY = (displayHeight * hiResScale) / 791.99;
+    
+    // Manually extracted coordinates from your SVG
+    // LEFT HAND - whole fingers for MINUTES (0-4)
+    const leftFingers = [
+      // ThumbLeft1 (minute 0)
+      [[116.14, 404.99], [30.14, 367.37], [22.46, 390.45], [88.71, 437.32], [173.24, 530.5], [193.53, 477.91]],
+      // PointerLeft2 (minute 1)
+      [[219.25, 215.93], [190.09, 152.15], [162.27, 85.14], [137.22, 96.7], [163.92, 164.57], [189.32, 230.57], [216.5, 316.09], [255.94, 295.17]],
+      // MiddleLeft3 (minute 2)
+      [[335.63, 186.54], [329.51, 99.37], [323.95, 20.12], [291.69, 22.39], [293.85, 101.87], [299.97, 189.04], [306.19, 277.71], [341.85, 275.21]],
+      // IndexLeft4 (minute 3)
+      [[428.4, 36.69], [412.85, 115.14], [402.73, 189.79], [386.42, 282], [429.24, 296.79], [440.52, 201.36], [449.59, 127.92], [458.51, 44.25]],
+      // PinkeyLeft5 (minute 4)
+      [[543.2, 150.08], [517.73, 203.39], [495.7, 255.77], [469.38, 312.44], [498.93, 334.49], [522.87, 276.65], [542.91, 220.91], [565.46, 159.15]]
+    ];
+    
+    // RIGHT HAND - segments for HOURS (0-11)
+    const rightSegments = [
+      // PinkeyRightTop1 (hour 0)
+      [[647.04, 166.64], [671.21, 227.78], [695.92, 209.61], [669.04, 156.99]],
+      // PinkeyRightmiddle2 (hour 1)
+      [[695.92, 209.61], [671.21, 227.78], [692.73, 282.97], [719.34, 261.38]],
+      // PinkeyRightbottom3 (hour 2)
+      [[747.15, 317.33], [719.34, 261.38], [692.73, 282.97], [718.2, 340.16]],
+      // IndexRightTop4 (hour 3)
+      [[780.8, 40.59], [750.91, 48.95], [762.04, 132.35], [798.42, 118.6]],
+      // IndexRightMiddle5 (hour 4)
+      [[773.05, 205.53], [810.52, 192.96], [798.42, 118.6], [762.04, 132.35]],
+      // IndexRightBottom6 (hour 5)
+      [[786.85, 300.62], [773.05, 205.53], [810.52, 192.96], [829.27, 284.7]],
+      // MiddleRightTop7 (hour 6)
+      [[917.08, 22.67], [884.77, 21.26], [881.32, 100.63], [917.03, 102.18]],
+      // MiddleRightMiddle8 (hour 7) - approximate rect corners after rotation
+      [[897.31, 127.5], [924.31, 126.5], [925.31, 214.5], [898.31, 215.5]],
+      // MiddleRightBottom9 (hour 8) - approximate rect corners after rotation
+      [[893.5, 215.5], [920.5, 214.5], [921.5, 302.5], [894.5, 303.5]],
+      // PointerRightTopA (hour 9)
+      [[1073.47, 92.86], [1048.12, 81.97], [1022.09, 149.7], [1048.57, 161.41]],
+      // PointerRightMiddleB (hour 10)
+      [[1048.57, 161.41], [1022.09, 149.7], [994.63, 214.23], [1024.94, 228.07]],
+      // PointerRightBottomC (hour 11)
+      [[1024.94, 228.07], [994.63, 214.23], [960.05, 294.41], [1000.04, 314.27]]
+    ];
+    
+    hiResCtx.strokeStyle = '#000';
+    hiResCtx.lineWidth = 2.5 * hiResScale;
+    hiResCtx.lineJoin = 'round';
+    hiResCtx.lineCap = 'round';
+    
+    // Draw active LEFT fingers (whole finger fills - DARKER)
+    for (let i = 0; i < Math.min(minutes, leftFingers.length); i++) {
+      const opacity = i === minutes - 1 ? 0.85 : 0.75;
+      hiResCtx.fillStyle = `rgba(10, 10, 10, ${opacity})`;
+      
+      hiResCtx.beginPath();
+      const finger = leftFingers[i];
+      finger.forEach((point, idx) => {
+        const x = point[0] * scaleX;
+        const y = point[1] * scaleY;
+        if (idx === 0) {
+          hiResCtx.moveTo(x, y);
+        } else {
+          hiResCtx.lineTo(x, y);
+        }
+      });
+      hiResCtx.closePath();
+      hiResCtx.fill();
+      hiResCtx.stroke();
+    }
+    
+    // Draw active RIGHT segments (lighter segments)
+    for (let i = 0; i < Math.min(hours, rightSegments.length); i++) {
+      const recencyFactor = Math.min(1, (hours - i) / 3);
+      const opacity = 0.50 + (recencyFactor * 0.30);
+      hiResCtx.fillStyle = `rgba(10, 10, 10, ${opacity})`;
+      
+      hiResCtx.beginPath();
+      const segment = rightSegments[i];
+      segment.forEach((point, idx) => {
+        const x = point[0] * scaleX;
+        const y = point[1] * scaleY;
+        if (idx === 0) {
+          hiResCtx.moveTo(x, y);
+        } else {
+          hiResCtx.lineTo(x, y);
+        }
+      });
+      hiResCtx.closePath();
+      hiResCtx.fill();
+      hiResCtx.stroke();
+    }
+    
+    applyPixelation(hiResCanvas, canvas, 0.5);
+  };
+  
+  img.src = 'data:image/svg+xml;base64,' + btoa(handSvg);
+}
+
+function applyPixelation(sourceCanvas, targetCanvas, pixelationScale) {
+  const loResCanvas = document.createElement('canvas');
+  loResCanvas.width = Math.max(1, Math.floor(sourceCanvas.width * pixelationScale));
+  loResCanvas.height = Math.max(1, Math.floor(sourceCanvas.height * pixelationScale));
+  const loResCtx = loResCanvas.getContext('2d');
+  loResCtx.imageSmoothingEnabled = false;
+  
+  loResCtx.drawImage(sourceCanvas, 0, 0, loResCanvas.width, loResCanvas.height);
+  
+  const ctx = targetCanvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+  ctx.drawImage(loResCanvas, 0, 0, targetCanvas.width, targetCanvas.height);
+}
+    
+    function renderLunarPhases(timeData) {
+      const vizContainer = document.getElementById('contextualViz');
+      
+      const html = `
+        <div class="lunar-phases">
+          <canvas id="lunarCanvas" width="320" height="100"></canvas>
+        </div>
+      `;
+      
+      vizContainer.innerHTML = html;
+      
+      setTimeout(() => {
+        drawLunarPhasesPixelated(timeData);
+      }, 0);
+    }
+
+    function drawLunarPhasesPixelated(timeData) {
+      const canvas = document.getElementById('lunarCanvas');
+      if (!canvas) return;
+      
+      const displayWidth = 320;
+      const displayHeight = 100;
+      const hiResScale = 2;
+      
+      // High-res canvas
+      const hiResCanvas = document.createElement('canvas');
+      hiResCanvas.width = displayWidth * hiResScale;
+      hiResCanvas.height = displayHeight * hiResScale;
+      const hiResCtx = hiResCanvas.getContext('2d');
+      
+      // Parse current phase (0-7)
+      const [hours] = timeData.displayText.split(':').map(v => parseInt(v));
+      
+      // Draw 8 moon phases in a row
+      const moonRadius = 18 * hiResScale;
+      const spacing = (displayWidth * hiResScale) / 9;
+      const centerY = displayHeight * hiResScale / 2 + 5 * hiResScale;
+      
+      // Phase names for labels
+      const phaseNames = ['New', 'Wax Cr', '1st Qt', 'Wax Gb', 'Full', 'Wan Gb', 'Last Qt', 'Wan Cr'];
+      
+      for (let i = 0; i < 8; i++) {
+        const centerX = spacing * (i + 1);
+        const isActive = (i === hours);
+        
+        hiResCtx.save();
+        hiResCtx.translate(centerX, centerY);
+        
+        // Draw circle outline
+        hiResCtx.strokeStyle = '#0a0a0a';
+        hiResCtx.lineWidth = 1.5 * hiResScale;
+        hiResCtx.globalAlpha = isActive ? 1 : 0.3;
+        
+        hiResCtx.beginPath();
+        hiResCtx.arc(0, 0, moonRadius, 0, Math.PI * 2);
+        hiResCtx.stroke();
+        
+        // Fill based on phase
+        hiResCtx.fillStyle = '#0a0a0a';
+        
+        if (i === 0) {
+          // New Moon - fully dark (just outline)
+        } else if (i === 1) {
+          // Waxing Crescent - thin sliver on right
+          hiResCtx.beginPath();
+          hiResCtx.arc(0, 0, moonRadius, -Math.PI/2, Math.PI/2);
+          hiResCtx.arc(0, 0, moonRadius * 0.6, Math.PI/2, -Math.PI/2, true);
+          hiResCtx.closePath();
+          hiResCtx.fill();
+        } else if (i === 2) {
+          // First Quarter - right half
+          hiResCtx.beginPath();
+          hiResCtx.arc(0, 0, moonRadius, -Math.PI/2, Math.PI/2);
+          hiResCtx.closePath();
+          hiResCtx.fill();
+        } else if (i === 3) {
+          // Waxing Gibbous - mostly lit, dark crescent on left
+          hiResCtx.beginPath();
+          hiResCtx.arc(0, 0, moonRadius, 0, Math.PI * 2);
+          hiResCtx.fill();
+          hiResCtx.fillStyle = '#ffffff';
+          hiResCtx.beginPath();
+          hiResCtx.arc(0, 0, moonRadius, Math.PI/2, -Math.PI/2);
+          hiResCtx.arc(0, 0, moonRadius * 0.6, -Math.PI/2, Math.PI/2, true);
+          hiResCtx.closePath();
+          hiResCtx.fill();
+        } else if (i === 4) {
+          // Full Moon - fully lit
+          hiResCtx.beginPath();
+          hiResCtx.arc(0, 0, moonRadius, 0, Math.PI * 2);
+          hiResCtx.fill();
+        } else if (i === 5) {
+          // Waning Gibbous - mostly lit, dark crescent on right
+          hiResCtx.beginPath();
+          hiResCtx.arc(0, 0, moonRadius, 0, Math.PI * 2);
+          hiResCtx.fill();
+          hiResCtx.fillStyle = '#ffffff';
+          hiResCtx.beginPath();
+          hiResCtx.arc(0, 0, moonRadius, -Math.PI/2, Math.PI/2);
+          hiResCtx.arc(0, 0, moonRadius * 0.6, Math.PI/2, -Math.PI/2, true);
+          hiResCtx.closePath();
+          hiResCtx.fill();
+        } else if (i === 6) {
+          // Last Quarter - left half
+          hiResCtx.beginPath();
+          hiResCtx.arc(0, 0, moonRadius, Math.PI/2, -Math.PI/2);
+          hiResCtx.closePath();
+          hiResCtx.fill();
+        } else if (i === 7) {
+          // Waning Crescent - thin sliver on left
+          hiResCtx.beginPath();
+          hiResCtx.arc(0, 0, moonRadius, Math.PI/2, -Math.PI/2);
+          hiResCtx.arc(0, 0, moonRadius * 0.6, -Math.PI/2, Math.PI/2, true);
+          hiResCtx.closePath();
+          hiResCtx.fill();
+        }
+        
+        // Draw phase label below (only for active phase to reduce clutter)
+        if (isActive) {
+          hiResCtx.fillStyle = 'rgba(10,10,10,0.8)';
+          hiResCtx.font = `${11 * hiResScale}px VT323`;
+          hiResCtx.textAlign = 'center';
+          hiResCtx.globalAlpha = 1;
+          hiResCtx.fillText(phaseNames[i], 0, moonRadius + 16 * hiResScale);
+        }
+        
+        hiResCtx.restore();
+      }
+      
+      hiResCtx.globalAlpha = 1;
+      
+      // Apply lighter pixelation
+      applyPixelation(hiResCanvas, canvas, 0.38);
+    }
+
+    function renderBinaryDots(timeData) {
+      const vizContainer = document.getElementById('contextualViz');
+      
+      const html = `
+        <div class="binary-dots">
+          <canvas id="binaryCanvas" width="320" height="100"></canvas>
+        </div>
+      `;
+      
+      vizContainer.innerHTML = html;
+      
+      setTimeout(() => {
+        drawBinaryDotsPixelated(timeData);
+      }, 0);
+    }
+
+    function drawBinaryDotsPixelated(timeData) {
+      const canvas = document.getElementById('binaryCanvas');
+      if (!canvas) return;
+      
+      const displayWidth = 320;
+      const displayHeight = 100;
+      const hiResScale = 2;
+      
+      // High-res canvas
+      const hiResCanvas = document.createElement('canvas');
+      hiResCanvas.width = displayWidth * hiResScale;
+      hiResCanvas.height = displayHeight * hiResScale;
+      const hiResCtx = hiResCanvas.getContext('2d');
+      
+      // Parse time values (0-7 for binary system)
+      const [hours, minutes, seconds] = timeData.displayText.split(':').map(v => parseInt(v));
+      
+      // Convert to 3-bit binary
+      const toBinary3 = (n) => [(n & 4) !== 0, (n & 2) !== 0, (n & 1) !== 0];
+      
+      const values = [
+        { label: 'H', bits: toBinary3(hours) },
+        { label: 'M', bits: toBinary3(minutes) },
+        { label: 'S', bits: toBinary3(seconds) }
+      ];
+      
+      const groupWidth = displayWidth * hiResScale / 3;
+      const dotRadius = 7 * hiResScale;
+      const activeDotRadius = 11 * hiResScale; // Bigger when active
+      const dotSpacing = 24 * hiResScale;
+      
+      values.forEach((group, groupIdx) => {
+        const centerX = groupWidth * (groupIdx + 0.5);
+        
+        // Draw label
+        hiResCtx.fillStyle = 'rgba(10,10,10,0.6)';
+        hiResCtx.font = `${16 * hiResScale}px VT323`;
+        hiResCtx.textAlign = 'center';
+        hiResCtx.fillText(group.label, centerX, 24 * hiResScale);
+        
+        // Draw dots
+        const startX = centerX - dotSpacing;
+        group.bits.forEach((isOn, bitIdx) => {
+          const x = startX + bitIdx * dotSpacing;
+          const y = displayHeight * hiResScale / 2 + 12 * hiResScale;
+          const radius = isOn ? activeDotRadius : dotRadius;
+          
+          hiResCtx.beginPath();
+          hiResCtx.arc(x, y, radius, 0, Math.PI * 2);
+          
+          if (isOn) {
+            hiResCtx.fillStyle = '#0a0a0a';
+            hiResCtx.fill();
+          } else {
+            hiResCtx.strokeStyle = 'rgba(10,10,10,0.4)';
+            hiResCtx.lineWidth = 1.5 * hiResScale;
+            hiResCtx.stroke();
+          }
+        });
+      });
+      
+      // Apply lighter pixelation
+      applyPixelation(hiResCanvas, canvas, 0.38);
+    }
+
+    function renderUncertaintyBars(timeData) {
+      const vizContainer = document.getElementById('contextualViz');
+      
+      const html = `
+        <div class="uncertainty-bars">
+          <canvas id="quantumCanvas" width="320" height="120"></canvas>
+        </div>
+      `;
+      
+      vizContainer.innerHTML = html;
+      
+      setTimeout(() => {
+        drawQuantumWavesPixelated(timeData);
+      }, 0);
+    }
+
+    let quantumAnimationId = null;
+    let quantumLastUncertainties = null;
+
+    function drawQuantumWavesPixelated(timeData) {
+      const canvas = document.getElementById('quantumCanvas');
+      if (!canvas) return;
+      
+      const displayWidth = 320;
+      const displayHeight = 120;
+      const hiResScale = 2;
+      
+      // Extract uncertainty values
+      const infoText = timeData.extraInfo || '';
+      const hMatch = infoText.match(/Δt\(h\):([0-9.]+)/);
+      const mMatch = infoText.match(/Δt\(m\):([0-9.]+)/);
+      const sMatch = infoText.match(/Δt\(s\):([0-9.]+)/);
+      
+      if (!hMatch || !mMatch || !sMatch) return;
+      
+      const uncertainties = [
+        parseFloat(hMatch[1]),
+        parseFloat(mMatch[1]),
+        parseFloat(sMatch[1])
+      ];
+      
+      // Store uncertainties for animation loop
+      quantumLastUncertainties = uncertainties;
+      
+      const labels = ['H', 'M', 'S'];
+      
+      // Only start new animation if not already running
+      if (!quantumAnimationId) {
+        let phase = 0;
+        
+        function animate() {
+          // Check if canvas still exists
+          const currentCanvas = document.getElementById('quantumCanvas');
+          if (!currentCanvas || !quantumLastUncertainties) {
+            quantumAnimationId = null;
+            return;
+          }
+          
+          const hiResCanvas = document.createElement('canvas');
+          hiResCanvas.width = displayWidth * hiResScale;
+          hiResCanvas.height = displayHeight * hiResScale;
+          const hiResCtx = hiResCanvas.getContext('2d');
+          
+          const waveHeight = (displayHeight * hiResScale) / 3;
+          const waveWidth = displayWidth * hiResScale;
+          
+          quantumLastUncertainties.forEach((uncertainty, idx) => {
+            const y = waveHeight * (idx + 0.5);
+            const amplitude = uncertainty * 50 * hiResScale;
+            const frequency = 0.018;
+            
+            // Draw label
+            hiResCtx.fillStyle = 'rgba(10,10,10,0.6)';
+            hiResCtx.font = `${14 * hiResScale}px VT323`;
+            hiResCtx.textAlign = 'left';
+            hiResCtx.fillText(labels[idx], 5 * hiResScale, y + 5 * hiResScale);
+            
+            // Draw sine wave
+            hiResCtx.strokeStyle = '#0a0a0a';
+            hiResCtx.lineWidth = 2.5 * hiResScale;
+            hiResCtx.globalAlpha = 0.7;
+            hiResCtx.beginPath();
+            
+            for (let x = 35 * hiResScale; x < waveWidth - 45 * hiResScale; x += 2) {
+              const waveY = y + Math.sin(x * frequency + phase) * amplitude;
+              if (x === 35 * hiResScale) {
+                hiResCtx.moveTo(x, waveY);
+              } else {
+                hiResCtx.lineTo(x, waveY);
+              }
+            }
+            
+            hiResCtx.stroke();
+            
+            // Draw uncertainty value
+            hiResCtx.globalAlpha = 0.6;
+            hiResCtx.textAlign = 'right';
+            hiResCtx.fillText(`±${uncertainty.toFixed(3)}`, waveWidth - 5 * hiResScale, y + 5 * hiResScale);
+          });
+          
+          hiResCtx.globalAlpha = 1;
+          
+          // Apply lighter pixelation
+          applyPixelation(hiResCanvas, currentCanvas, 0.38);
+          
+          phase += 0.04;
+          quantumAnimationId = requestAnimationFrame(animate);
+        }
+        
+        animate();
+      }
+    }
+
+    function applyPixelation(sourceCanvas, targetCanvas, pixelationScale) {
+      const loResCanvas = document.createElement('canvas');
+      loResCanvas.width = Math.max(1, Math.floor(sourceCanvas.width * pixelationScale));
+      loResCanvas.height = Math.max(1, Math.floor(sourceCanvas.height * pixelationScale));
+      const loResCtx = loResCanvas.getContext('2d');
+      loResCtx.imageSmoothingEnabled = false;
+      
+      // Downscale
+      loResCtx.drawImage(sourceCanvas, 0, 0, loResCanvas.width, loResCanvas.height);
+      
+      // Upscale to target
+      const ctx = targetCanvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+      ctx.drawImage(loResCanvas, 0, 0, targetCanvas.width, targetCanvas.height);
+    }
+
+    function renderBinaryDots(timeData) {
+      const vizContainer = document.getElementById('contextualViz');
+      
+      // Parse time values (already in base-8, 0-7)
+      const timeStr = timeData.displayText;
+      const [hours, minutes, seconds] = timeStr.split(':').map(v => parseInt(v));
+      
+      // Convert to 3-bit binary
+      const toBinary3 = (n) => {
+        return [
+          (n & 4) !== 0, // bit 2
+          (n & 2) !== 0, // bit 1
+          (n & 1) !== 0  // bit 0
+        ];
+      };
+      
+      const hBits = toBinary3(hours);
+      const mBits = toBinary3(minutes);
+      const sBits = toBinary3(seconds);
+      
+      const renderDots = (bits) => {
+        return bits.map(bit => 
+          `<div class="binary-dot ${bit ? 'on' : ''}"></div>`
+        ).join('');
+      };
+      
+      const html = `
+        <div class="binary-dots">
+          <div class="binary-group">
+            <div class="binary-label">HOURS</div>
+            <div class="binary-value">${renderDots(hBits)}</div>
+          </div>
+          <div class="binary-group">
+            <div class="binary-label">MINUTES</div>
+            <div class="binary-value">${renderDots(mBits)}</div>
+          </div>
+          <div class="binary-group">
+            <div class="binary-label">SECONDS</div>
+            <div class="binary-value">${renderDots(sBits)}</div>
+          </div>
+        </div>
+      `;
+      
+      vizContainer.innerHTML = html;
+    }
+
+    function renderHexDisplay(timeData) {
+      const vizContainer = document.getElementById('contextualViz');
+      
+      // Parse hex values from display
+      const timeStr = timeData.displayText;
+      const [hours, minutes, seconds] = timeStr.split(':');
+      
+      // 7-segment encoding for hex digits
+      const segments = {
+        '0': [1,1,1,1,1,1,0], '1': [0,1,1,0,0,0,0], '2': [1,1,0,1,1,0,1],
+        '3': [1,1,1,1,0,0,1], '4': [0,1,1,0,0,1,1], '5': [1,0,1,1,0,1,1],
+        '6': [1,0,1,1,1,1,1], '7': [1,1,1,0,0,0,0], '8': [1,1,1,1,1,1,1],
+        '9': [1,1,1,1,0,1,1], 'A': [1,1,1,0,1,1,1], 'B': [0,0,1,1,1,1,1],
+        'C': [1,0,0,1,1,1,0], 'D': [0,1,1,1,1,0,1], 'E': [1,0,0,1,1,1,1],
+        'F': [1,0,0,0,1,1,1]
+      };
+      
+      const renderDigit = (digit) => {
+        const segs = segments[digit] || [0,0,0,0,0,0,0];
+        return `
+          <div class="seven-segment">
+            <div class="segment horizontal ${segs[0] ? 'on' : ''}" style="top: 0;"></div>
+            <div class="segment vertical ${segs[1] ? 'on' : ''}" style="top: 2px; right: 5px;"></div>
+            <div class="segment vertical ${segs[2] ? 'on' : ''}" style="bottom: 2px; right: 5px;"></div>
+            <div class="segment horizontal ${segs[3] ? 'on' : ''}" style="bottom: 0;"></div>
+            <div class="segment vertical ${segs[4] ? 'on' : ''}" style="bottom: 2px; left: 5px;"></div>
+            <div class="segment vertical ${segs[5] ? 'on' : ''}" style="top: 2px; left: 5px;"></div>
+            <div class="segment horizontal ${segs[6] ? 'on' : ''}" style="top: 28px;"></div>
+          </div>
+        `;
+      };
+      
+      const html = `
+        <div class="hex-display">
+          <div class="hex-digit">
+            <div class="hex-digit-label">H</div>
+            ${renderDigit(hours[0])}${renderDigit(hours[1])}
+          </div>
+          <div class="hex-digit">
+            <div class="hex-digit-label">M</div>
+            ${renderDigit(minutes[0])}${renderDigit(minutes[1])}
+          </div>
+          <div class="hex-digit">
+            <div class="hex-digit-label">S</div>
+            ${renderDigit(seconds[0])}${renderDigit(seconds[1])}
+          </div>
+        </div>
+      `;
+      
+      vizContainer.innerHTML = html;
+    }
+
+    function renderMayanNotation(timeData) {
+      const vizContainer = document.getElementById('contextualViz');
+      
+      // Parse vigesimal values
+      const timeStr = timeData.displayText;
+      const [hours, minutes, seconds] = timeStr.split(':').map(v => parseInt(v));
+      
+      const renderMayanNumber = (n) => {
+        if (n === 0) {
+          return '<div class="mayan-zero"></div>';
+        }
+        
+        const bars = Math.floor(n / 5);
+        const dots = n % 5;
+        
+        let html = '';
+        
+        // Add bars (each = 5)
+        for (let i = 0; i < bars; i++) {
+          html += '<div class="mayan-bar"></div>';
+        }
+        
+        // Add dots (each = 1)
+        if (dots > 0) {
+          html += '<div class="mayan-dots">';
+          for (let i = 0; i < dots; i++) {
+            html += '<div class="mayan-dot"></div>';
+          }
+          html += '</div>';
+        }
+        
+        return html;
+      };
+      
+      const html = `
+        <div class="mayan-notation">
+          <div class="mayan-group">
+            <div class="mayan-label">HOURS (${hours})</div>
+            <div class="mayan-number">${renderMayanNumber(hours)}</div>
+          </div>
+          <div class="mayan-group">
+            <div class="mayan-label">MINUTES (${minutes})</div>
+            <div class="mayan-number">${renderMayanNumber(minutes)}</div>
+          </div>
+          <div class="mayan-group">
+            <div class="mayan-label">SECONDS (${seconds})</div>
+            <div class="mayan-number">${renderMayanNumber(seconds)}</div>
+          </div>
+        </div>
+      `;
+      
+      vizContainer.innerHTML = html;
+    }
+
+    // ===== SUBDIVISION VIZ RENDERER =====
+    
+    function drawSubdivisionViz(canvasId, divisions) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const size = canvas.width;
+      const center = size / 2;
+      const radius = size * 0.38;
+      
+      ctx.clearRect(0, 0, size, size);
+      
+      const angleStep = (2 * Math.PI) / divisions;
+      ctx.beginPath();
+      for (let i = 0; i <= divisions; i++) {
+        const angle = i * angleStep - Math.PI / 2;
+        const x = center + radius * Math.cos(angle);
+        const y = center + radius * Math.sin(angle);
+        
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.strokeStyle = '#0a0a0a';
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.6;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      
+      const displayDivisions = Math.min(divisions, 60);
+      const displayStep = (2 * Math.PI) / displayDivisions;
+      
+      ctx.globalAlpha = 0.3;
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i < displayDivisions; i++) {
+        const angle = i * displayStep - Math.PI / 2;
+        const x = center + radius * Math.cos(angle);
+        const y = center + radius * Math.sin(angle);
+        
+        ctx.beginPath();
+        ctx.moveTo(center, center);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // ===== CLOCK CONTROLLER =====
+    
+    class ClockController {
+      constructor() {
+        this.renderer = new CanvasClockRenderer('clockCanvas', 600);
+        this.timeSystems = new Map();
+        this.currentSystem = null;
+        this.activePolygonButton = null;
+        this.setupTimeSystems();
+      }
+
+      setupTimeSystems() {
+        const systems = [
+          new RegularTimeSystem(),
+          new DecimalTimeSystem(),
+          new HexadecimalTimeSystem(),
+          new BinaryTimeSystem(),
+          new OctalTimeSystem(),
+          new QuinaryTimeSystem(),
+          new SeptimalTimeSystem(),
+          new DuodecimalTimeSystem(),
+          new VigesimalTimeSystem(),
+          new FibonacciTimeSystem(),
+          new GoldenTimeSystem(),
+          new PiTimeSystem(),
+          new LunarTimeSystem(),
+          new FingerCountingTimeSystem(),
+          new HarmonicTimeSystem(),
+          new QuantumTimeSystem(),
+          new PrimeTimeSystem()
+        ];
+
+        systems.forEach(system => {
+          this.timeSystems.set(system.name, system);
+        });
+
+        this.currentSystem = this.timeSystems.get("regular");
+      }
+
+      switchTimeSystem(systemName) {
+        const system = this.timeSystems.get(systemName);
+        if (system) {
+          this.currentSystem = system;
+          this.contextualVizRendered = false; // Reset flag to force re-render
+          
+          // Clean up quantum animation when switching away
+          if (quantumAnimationId) {
+            cancelAnimationFrame(quantumAnimationId);
+            quantumAnimationId = null;
+          }
+          
+          // Show audio controls only for harmonic system
+          const audioControls = document.getElementById('audioControls');
+          if (systemName === 'harmonic') {
+            audioControls.style.display = 'flex';
+          } else {
+            audioControls.style.display = 'none';
+            // Stop audio if switching away from harmonic
+            if (audioSystem.isPlaying) {
+              audioSystem.stop();
+              document.getElementById('audioToggle').textContent = '♪ SOUND OFF';
+              document.getElementById('audioToggle').classList.remove('active');
+            }
+          }
+          
+          this.updateClock();
+        }
+      }
+
+      updateClock() {
+        const now = new Date();
+        const timeData = this.currentSystem.calculateTime(now);
+
+        // Track last display text to avoid unnecessary contextual viz re-renders
+        const lastDisplayText = this.lastDisplayText || '';
+        this.lastDisplayText = timeData.displayText;
+
+        document.getElementById('timeDisplay').textContent = timeData.displayText;
+        document.getElementById('description').textContent = timeData.description;
+        document.getElementById('systemName').textContent = timeData.systemName;
+        document.getElementById('systemTitle').textContent = timeData.systemTitle;
+        document.getElementById('systemCategory').textContent = timeData.systemCategory || 'SYSTEM';
+        
+        document.querySelector('.app-title').textContent = timeData.systemTitle.toLowerCase();
+
+        const subs = this.currentSystem.getTimeSubdivisions();
+        document.getElementById('hoursValue').textContent = subs.hours;
+        document.getElementById('minutesValue').textContent = subs.minutes;
+        document.getElementById('secondsValue').textContent = subs.seconds;
+
+        document.getElementById('btnHours').textContent = subs.hours + 'H';
+        document.getElementById('btnMinutes').textContent = subs.minutes + 'M';
+        document.getElementById('btnSeconds').textContent = subs.seconds + 'S';
+
+        this.renderer.framePolygonSides = subs.hours;
+
+        this.renderer.updateTime(timeData.secondDeg, timeData.minuteDeg, timeData.hourDeg);
+
+        drawSubdivisionViz('hourViz', subs.hours);
+        drawSubdivisionViz('minuteViz', subs.minutes);
+        drawSubdivisionViz('secondViz', subs.seconds);
+
+        // Only render contextual visualization when display text changes (prevents flickering)
+        if (timeData.displayText !== lastDisplayText || !this.contextualVizRendered) {
+          renderContextualViz(this.currentSystem.name, timeData);
+          this.contextualVizRendered = true;
+        }
+
+        // Update audio for harmonic system
+        if (this.currentSystem.name === 'harmonic' && audioSystem.isPlaying && timeData.noteIndices) {
+          audioSystem.updateFrequencies(timeData.noteIndices);
+        }
+      }
+
+      updatePolygon(sides) {
+        this.renderer.updatePolygon(sides);
+      }
+
+      hidePolygon() {
+        this.renderer.hidePolygon();
+      }
+
+      setActivePolygonButton(buttonId) {
+        this.activePolygonButton = buttonId;
+      }
+
+      getActivePolygonButton() {
+        return this.activePolygonButton || null;
+      }
+
+      startClock() {
+        const updateAndSchedule = () => {
+          this.updateClock();
+          setTimeout(updateAndSchedule, this.currentSystem.intervalMs);
+        };
+        updateAndSchedule();
+      }
+    }
+
+    // ===== INITIALIZATION =====
+    
+    const clockController = new ClockController();
+    clockController.startClock();
+
+    // ===== UI INTERACTIONS =====
+    
+    function navigateToPage(pageId) {
+      document.querySelectorAll('.menu-page').forEach(page => {
+        page.classList.remove('active');
+      });
+      document.getElementById(pageId).classList.add('active');
+    }
+
+    document.querySelectorAll('.menu-nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const targetPage = item.getAttribute('data-page');
+        const backPage = item.getAttribute('data-back');
+        
+        if (targetPage) {
+          navigateToPage(targetPage);
+        } else if (backPage) {
+          navigateToPage(backPage);
+        }
+      });
+    });
+
+    document.querySelectorAll('.menu-back').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const backPage = btn.getAttribute('data-back');
+        if (backPage) {
+          navigateToPage(backPage);
+        }
+      });
+    });
+    
+    const panel = document.getElementById('controlPanel');
+    const container = document.getElementById('clockContainer');
+    const toggle = document.getElementById('panelToggle');
+
+    toggle.addEventListener('click', () => {
+      panel.classList.toggle('collapsed');
+      container.classList.toggle('expanded');
+      toggle.textContent = panel.classList.contains('collapsed') ? '▶' : '◀';
+      
+      setTimeout(() => {
+        clockController.renderer.setupCanvas();
+        clockController.renderer.render();
+      }, 350);
+    });
+
+    document.querySelectorAll('.clock-menu-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.clock-menu-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        
+        const system = item.getAttribute('data-system');
+        if (clockController.timeSystems.has(system)) {
+          clockController.switchTimeSystem(system);
+          
+          setTimeout(() => {
+            navigateToPage('mainMenu');
+          }, 300);
+        }
+      });
+    });
+
+    document.getElementById('menuHeaderNav').addEventListener('click', () => {
+      navigateToPage('clockMenu');
+    });
+
+    // System navigation arrows
+    const systemOrder = [
+      'regular', 'decimal', 'duodecimal', 'vigesimal',
+      'quinary', 'septimal', 'octal', 'hexadecimal', 'binary', 'prime',
+      'fibonacci', 'golden', 'pi', 'lunar',
+      'finger',
+      'harmonic', 'quantum'
+    ];
+
+    document.getElementById('prevSystem').addEventListener('click', () => {
+      const currentIndex = systemOrder.indexOf(clockController.currentSystem.name);
+      const prevIndex = (currentIndex - 1 + systemOrder.length) % systemOrder.length;
+      clockController.switchTimeSystem(systemOrder[prevIndex]);
+    });
+
+    document.getElementById('nextSystem').addEventListener('click', () => {
+      const currentIndex = systemOrder.indexOf(clockController.currentSystem.name);
+      const nextIndex = (currentIndex + 1) % systemOrder.length;
+      clockController.switchTimeSystem(systemOrder[nextIndex]);
+    });
+
+    let currentActiveButton = null;
+    
+    document.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const subs = clockController.currentSystem.getTimeSubdivisions();
+        
+        if (currentActiveButton === btn) {
+          btn.classList.remove('active');
+          currentActiveButton = null;
+          clockController.setActivePolygonButton(null);
+          clockController.hidePolygon();
+        } else {
+          document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentActiveButton = btn;
+          clockController.setActivePolygonButton(btn.id);
+          
+          if (btn.id === 'btnHours') {
+            clockController.updatePolygon(subs.hours);
+          } else if (btn.id === 'btnMinutes') {
+            clockController.updatePolygon(subs.minutes);
+          } else if (btn.id === 'btnSeconds') {
+            clockController.updatePolygon(subs.seconds);
+          }
+        }
+      });
+    });
+
+    // Audio toggle
+    document.getElementById('audioToggle').addEventListener('click', (e) => {
+      const btn = e.target;
+      
+      if (audioSystem.isPlaying) {
+        audioSystem.stop();
+        btn.textContent = '♪ SOUND OFF';
+        btn.classList.remove('active');
+      } else {
+        audioSystem.start();
+        btn.textContent = '♪ SOUND ON';
+        btn.classList.add('active');
+        // Immediately update with current time
+        clockController.updateClock();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'f' || e.key === 'F') {
+        toggle.click();
+      }
+    });
+
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        clockController.renderer.setupCanvas();
+        clockController.renderer.render();
+      }, 150);
+    });
+  </script>
+</body>
+</html>
